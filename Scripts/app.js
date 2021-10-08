@@ -129,16 +129,53 @@ function init() {
   }
 
   // Handling key up
+
+
+  function changePOSN(level) {
+    level.cells[level.currentPOSN].classList.remove('food')
+    level.cells[level.currentPOSN].classList.add('player')
+  }
+
+  function removePOSN(level) {
+    console.log(level)
+    level.cells[level.currentPOSN].classList.remove('player')
+  }
+
+  function moveRight(level) {
+    const myInterval = setInterval(function () {
+      if (level.empty.includes(level.currentPOSN + 1)) {
+        removePOSN(level)
+        level.currentPOSN++
+        changePOSN(level)
+      } else {
+        console.log('this should work')
+        clearInterval(myInterval)
+      }
+    }, 200)
+  }
+
+  function moveLeft(level) {
+    const myInterval = setInterval(function () {
+      if (level.empty.includes(level.currentPOSN - 1)) {
+        removePOSN(level)
+        level.currentPOSN--
+        changePOSN(level)
+      } else {
+        console.log('this should work')
+        clearInterval(myInterval)
+      }
+    }, 200)
+  }
+
+
   function handleKeyUp(event) {
+    
     const key = event.keyCode
     removePOSN(this)
-    if (key === 39 && this.empty.includes(this.currentPOSN + 1)) {
-      console.log('RIGHT')
-
-      this.currentPOSN++
-    } else if (key === 37 && this.empty.includes(this.currentPOSN - 1)) {
-      console.log('LEFT')
-      this.currentPOSN--
+    if (key === 39) {
+      moveRight(this)
+    } else if (key === 37) {
+      moveLeft(this)
     } else if (key === 38 && this.empty.includes(this.currentPOSN - this.width)) {
       console.log('UP')
       this.currentPOSN -= this.width
@@ -151,16 +188,13 @@ function init() {
     changePOSN(this)
   }
 
-  function changePOSN(level) {
-    level.cells[level.currentPOSN].classList.remove('food')
-    level.cells[level.currentPOSN].classList.add('player')
-  }
 
-  function removePOSN(level) {
-    level.cells[level.currentPOSN].classList.remove('player')
-  }
+
+
+
 
   // Main function
+
   function game(level) {
     document.addEventListener('keyup', handleKeyUp.bind(level))
     buildBoard(level)

@@ -102,8 +102,7 @@ footer {
   background-image: url('../Assets/cat-walking.gif');
   background-color: lightgray;
   background-position: center;
-  background-position-x: -8px;
-  background-size: 35px;
+  background-size: 28px;
   background-repeat: no-repeat;
 }
 
