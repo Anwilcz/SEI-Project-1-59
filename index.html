@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+  <title>SEI Project 1 - Pac-Man Game</title>
+  <link rel="stylesheet" href="./Styles/main.css">
+  <script src="./Scripts/app.js" charset="utf-8"></script>
+</head>
+
+<body>
+
+  <!-- * Title * -->
+  <header>
+    <h1>Pac-Man Game</h1>
+  </header>
+  <!-- * Game Navigation * -->
+  <div class='content'>
+    <main>
+      <div class='nav-game'>
+        <div class='nav-buttons'>
+          <button id='start-button'>Start Game</button>
+          <button id='restart-button'>Restart</button>
+        </div>
+        <!-- * Game Results * -->
+        <div>
+          <p class='score'>current score: <span id='current-score'>50</span></p>
+          <div class='remaining'>
+            <img class='icon' src='./Assets/clock.gif' alt='coffee-cup'>
+            <p><span id='remaining-time'>300</span>s</p>
+            <img class='icon' src='./Assets/coffee-cup.gif' alt='coffee-cup'>
+            <p><span id='remaining-coins'>50</span></p>
+          </div>
+        </div>
+      </div>
+      <div class='grid'></div>
+      <!-- * Game instructions * -->
+      <div class='instructions'></div>
+    </main>
+    <footer>
+      <p>SEI-59 Project 1 - Pac Man</p>
+    </footer>
+  </div>
+</body>
+
+</html>

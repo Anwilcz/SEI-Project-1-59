@@ -1,0 +1,131 @@
+/* General */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  background-color: lightgray;
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+main {
+  background-color: white;
+}
+
+/* Header */
+
+header {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  width: 100vw;
+  background-color: lightcyan;
+  
+}
+
+p {
+  margin: 5px;
+}
+/* Game Navigation */
+
+.nav-game {
+  display: flex;
+  justify-content: space-between;
+  background-color: lightgray;
+}
+
+.remaining {
+  display: flex;
+}
+
+.nav-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
+}
+
+/* Grid */
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white; 
+}
+
+.cell {
+  width: 28px;
+  height: 28px;
+  margin: 1px;
+  border: 1px solid lightgray;
+  background-color: lightgray;
+    /* temp */
+    font-size: 8px;
+}
+
+.solid {
+  background-color: rgb(85, 49, 32);
+  box-shadow: inset 0px 0px 4px 2px rgba(0, 0, 0, 0.6);
+  border: 1px solid black;
+}
+
+.food
+
+/* Footer */
+
+footer {
+  text-align: center;
+  width: 100vw;
+  background-color: lightcyan;
+}
+
+/* Game objects */
+
+.player {
+  
+  background-image: url('../Assets/cat-walking.gif');
+  background-color: lightgray;
+  background-position: center;
+  background-position-x: -8px;
+  background-size: 35px;
+  background-repeat: no-repeat;
+}
+
+.opponent {
+  background-image: url('../Assets/dog.gif') !important; 
+  background-size: 28px !important;
+
+}
+
+.food {
+  background-image: url('../Assets/coffee-cup.gif') ;
+  background-color: lightgray;
+  background-position: center;
+  background-size: 15px;
+  background-repeat: no-repeat;
+}
+
+.magic-food {
+  background-image: url('../Assets/magic_food.gif');
+  background-color: lightgray;
+  background-position: center;
+  background-position-y: -7px;
+  background-size: 36px;
+  background-repeat: no-repeat;
+}
