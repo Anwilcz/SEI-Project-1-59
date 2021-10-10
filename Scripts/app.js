@@ -184,68 +184,69 @@ function init() {
     main.style.width = `${(level.nodes[0].cell.offsetWidth * level.width) + 2 * level.width}px`
 
   }
-  // ! GAME MECHANICS
-  function changePOSN(level) {
+  // ! PLAYER CONTROL MECHANICS
+
+  function changePlayerPosition(level) {
     scorePoints(level)
     level.nodes[level.player.index].cell.classList.remove('food')
     level.nodes[level.player.index].cell.classList.remove('magic-food')
     level.nodes[level.player.index].cell.classList.add('player')
   }
 
-  function removePOSN(level) {
+  function removePlayerPosition(level) {
     level.nodes[level.player.index].cell.classList.remove('player')
   }
 
   function moveRight(level) {
     if (!level.collisions.includes(level.player.index + 1)) {
-      removePOSN(level)
+      removePlayerPosition(level)
       level.player.index++
       level.player.currentPosition.x++
-      changePOSN(level)
+      changePlayerPosition(level)
     } else {
-      clearInterval(myInterval)
+      clearInterval(playerInterval)
     }
   }
 
   function moveLeft(level) {
     if (!level.collisions.includes(level.player.index - 1)) {
-      removePOSN(level)
+      removePlayerPosition(level)
       level.player.index--
       level.player.currentPosition.x--
-      changePOSN(level)
+      changePlayerPosition(level)
     } else {
-      clearInterval(myInterval)
+      clearInterval(playerInterval)
     }
   }
 
   function moveUp(level) {
     if (!level.collisions.includes(level.player.index - level.width)) {
-      removePOSN(level)
+      removePlayerPosition(level)
       level.player.index -= level.width
       level.player.currentPosition.y--
-      changePOSN(level)
+      changePlayerPosition(level)
     } else {
-      clearInterval(myInterval)
+      clearInterval(playerInterval)
     }
   }
 
   function moveDown(level) {
     if (!level.collisions.includes(level.player.index + level.width)) {
-      removePOSN(level)
+      removePlayerPosition(level)
       level.player.index += level.width
       level.player.currentPosition.y++
-      changePOSN(level)
+      changePlayerPosition(level)
     } else {
-      clearInterval(myInterval)
+      clearInterval(playerInterval)
     }
   }
 
-  let myInterval = setInterval(handleKeyUp, 300,)
+  let playerInterval
 
   function handleKeyUp(event) {
     const key = event.keyCode
-    clearInterval(myInterval)
-    myInterval = setInterval(function () {
+    clearInterval(playerInterval)
+    playerInterval = setInterval(function () {
       if (key === 39) {
         moveRight(this)
       } else if (key === 37) {
@@ -259,58 +260,131 @@ function init() {
 
   }
 
+  // ! OPPONENT CONTROL MECHANICS
+
+  function changeOpponentPosition(level, opponentPosition) {
+    level.nodes[opponentPosition].cell.classList.add('opponent')
+  }
+
+  function removeOpponentPosition(level, opponentPosition) {
+    level.nodes[opponentPosition].cell.classList.remove('opponent')
+  }
+
+ 
+
   // ! PATH FINDING ALGORITHM (A*)
 
-  // function findPath(level, startNode, finalNode)
-  // findPath returns an array of ordered node.cell indices forming the shortest path to the finalNode
+  // * Algorithm key values
 
   // F(currentNode) = G(currentNode) + H(currentNode)
   // F = number of nodes between startNode and finalNode (incl. finalNode)
   // G = number of nodes between currentNode and currentNode (incl. currentNode)
   // H = number of nodes between currentNode and finalNode (incl. finalNode; heuristic value)
 
-  // nodesToCheck = new Array -> Open a set of nodes to be checked
-  // nodesChecked = new Array -> Close a set of nodes that have been checked
-  // let currentNode = startNode -> First node currently being checked is startNode
-  // nodesToCheck.push(currentNode) -> Push startNode as first node to be checked
-  
-  // While nodesToCheck is not empty:
-  //    Check F for all nodes in nodesToCheck
-  //    Pick a node from nodesToCheck with the lowest F value
-  //    => for (let i = 0; i < nodesToCheck.lenght - 1) { if(nodesToCheck[i] < nodesToCheck[i + 1]) => lowestFIndex = i}
-  //    => This will skip the start Node since (i = 0) < (nodesToCheck.lenght = 1) - 1 => 0 < 0 is false
-  //    Check if currentNode === finalNode
-  //    => If true, break the loop and return the path
-  //       => path = new Array
-  //       => currentChild = currentNode
-  //       => While (currentChild.parent) -> Returns true if parent is a defined object
-  //          => path.push(currentChild) -> Add parent object to the path
-  //          => currentChild = currentChild.parent -> change hierarchy level
-  //          => return path.reverse() -> return path in reversed order, so it goes from starting node - the last child in hierarchy 
-  //    => If false, keep looping
-  //    Move currentNode from nodesToCheck to nodesChecked
-  //    => nodesChecked.push(currentNode)
-  //    => nodesToCheck.splice(currentNode, 1)
-  //    Identify adjacentNodes
-  //    => adjacentNodes = findAdjacent(currentNode) -> write a function that finds 4 adjacent nodes
-  //    Check if adjacentNode is not a solid cell or it has been already checked
-  //    =>if(adjacentNode.cell has a class 'solid' or nodesChecked.includes(adjacentNode)):
-  //    => If true, ignore and check next adjacentNode (continue)
-  //    => If false, check G and H of adjacentNode
-  //    => G has to be incremented currentNode.g value
-  //    => lowestNodeG = currentNode.G
-  //    => if adjacentNode does not exist on nodesToCheck list:
-  //       => If false, Add node to nodesToCheck list -> nodesToCheck.push(adjacentNode)
-  //       => Calculate adjacentNode.H = calculateH(adjacentNode)
-  //       => Update adjacentNode.G = currentNode.G + 1
-  //       => Update adjacentNode.F = calculateF(adjacentNode) -> adjacentNode.G + adjacentNode.H 
-  //       => adjacentNode.parent = currentNode -> Save new path stacking child elements in adjacentNode.parent property        
-  //    => else if => adjacentNode already exists on nodesToCheck list but this time it has lower G
-  //                  than the previous time it was checked. -> if(lowestNodeG < calculateGn(startNode, adjacentNode))
-  //               => Update adjacentNode.G = currentNode.G + 1
-  //               => Update adjacentNode.F = calculateF(adjacentNode) -> adjacentNode.G + adjacentNode.H     
-  //               => adjacentNode.parent = currentNode -> Update with a better path stacking child elements in adjacentNode.parent property 
-  // If nodesToCheck is empty - No solution found
+  // * Calculating F, G, H values:
+
+  function calculateH(node, finalNode) {
+    return (Math.abs(node.x - finalNode.x) + Math.abs(node.y - finalNode.y))
+  }
+
+  function calculateG(node, startNode) {
+    return (Math.abs(node.x - startNode.x) + Math.abs(node.y - startNode.y))
+  }
+
+  function calculateF(node) {
+    return node.g + node.h
+  }
+
+  function findPath(level, startNode, finalNode) {
+    // * findPath returns an array of ordered node.cell indices forming the shortest path to the finalNode
+
+    // * Create open and closed sets of nodes
+    const nodesToCheck = new Array // Open a set of nodes to be checked
+    const nodesChecked = new Array // Close a set of nodes that have been checked
+
+    // * Begin search from startNode
+    let currentNode = startNode // let currentNode = startNode -> First node currently being checked is startNode
+
+    nodesToCheck.push(currentNode) // Push startNode as first node to be checked
+
+    // * Search for the shortest path while there are still nodes to check
+    while (nodesToCheck.length > 0) { // While nodesToCheck is not empty:
+
+      // * Check F for all nodes in nodesToCheck and select the node from nodesToCheck with the lowest F value:
+      let lowestFIndex = 0
+      for (let i = 0; i < nodesToCheck.length - 1; i++) { // This will skip the start Node since (i = 0) < (nodesToCheck.lenght = 1) - 1 => 0 < 0 is false
+        if (nodesToCheck[i].F < nodesToCheck[(i + 1)].F) {
+          lowestFIndex = i
+        }
+      }
+      currentNode = nodesToCheck[lowestFIndex] // Store node with the lowest F value in variable
+
+      // * Check if currentNode is the finalNode& return the shortest path:
+      if (currentNode.index === finalNode.index) { // If true, break the loop and return the path
+        const path = new Array // Creates a saved path
+        let currentChild = currentNode
+
+        while (currentChild.parent) { // Returns true if parent is a defined object
+          path.push(currentChild) // Adds parent object to the path
+          currentChild = currentChild.parent // change hierarchy level
+        }
+        path.forEach(node => node.cell.classList.add('path'))
+        return path.reverse() // return path in reversed order, so it goes from starting node - the last child in hierarchy 
+      }
+
+      // * Close search for currentNode & move it from nodesToCheck to nodesChecked
+      nodesChecked.push(currentNode)
+      nodesToCheck.splice(currentNode, 1)
+
+      // * Find adjacentNodes
+      const adjacentNodes = findAdjacent(level, currentNode) // findAdjacent identifies 4 adjacent nodes
+
+      for (let i = 0; i < adjacentNodes.length; i++) {
+        const adjacentNode = adjacentNodes[i]
+
+        // * Check if adjacentNode is not a solid cell or it has been already checked
+        if (nodesChecked.includes(adjacentNode) || adjacentNode.cell.classList.contains('solid')) {
+
+          continue // Ignore and check next adjacentNode 
+        }
+
+
+        const lowestNodeG = currentNode.G + 1 // LowestNodeG is current.node.G from current path incremented by 1
+
+        // * check G and H of adjacentNode:
+        if (!nodesToCheck.includes(adjacentNode)) {
+          // AdjacentNode does not exist on the list of nodesToCheck
+
+          nodesToCheck.push(adjacentNode) // Add node to nodesToCheck list
+          adjacentNode.G = lowestNodeG + 1 // Add adjacentNode G
+          adjacentNode.H = calculateH(adjacentNode, finalNode) // Calculate adjacentNodeH
+          adjacentNode.F = calculateF(adjacentNode) // Calculate adjacentNodeF
+          adjacentNode.parent = currentNode // Save new path stacking child elements in adjacentNode.parent property
+
+        } else if (lowestNodeG < calculateG(adjacentNode, startNode)) {
+          // adjacentNode already exists on nodesToCheck list but this time it has lower G than the previous time it was checked 
+
+          adjacentNode.G = lowestNodeG + 1 // Add adjacentNode G
+          adjacentNode.F = calculateF(adjacentNode) // Calculate adjacentNodeF
+          adjacentNode.parent = currentNode // Save new path stacking child elements in adjacentNode.parent property
+        }
+      }
+    }
+    return 'No result found' // If nodesToCheck is empty - No solution found
+  }
+
+
+
+  function findAdjacent(level, currentNode) {
+    // * findAdjacent returns an array of 4 nodes adjacent 
+
+    const adjacentNodes = new Array
+    level.nodes.forEach(node => {
+      if ((node.index === currentNode.index + 1) || (node.index === currentNode.index - 1) || (node.index === currentNode.index + level.width) || (node.index === currentNode.index - level.width))
+        adjacentNodes.push(node)
+    })
+    return adjacentNodes
+  }
 
   // ! SCORING POINTS
 
@@ -331,6 +405,7 @@ function init() {
   }
 
   game(levelOne)
+
 
 }
 
