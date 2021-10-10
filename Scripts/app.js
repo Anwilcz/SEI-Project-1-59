@@ -27,15 +27,17 @@
 // - Start the timer when game begins && invoke main function
 
 // Ghosts:
-// - Write a function that randomizes ghost moves 
-// - Check if pac-man moves in the same collumn/row as a ghost (between solid blocks), if so -> chasing begins
-// - Ghost will follow pac-man for the next 15 squares moves
+// - Write a function that randomizes ghost moves
+// - Ghosts move 1 node per second, invoke findPath function after each move to find the shortest path to the player //! (A*)
+// - Check if pac-man moves in the same collumn/row as a ghost (between solid blocks), if so -> chasing begins //! TBC LATER
+// - Ghost will follow pac-man for the next 15 squares moves //! TBC LATER
 // - If ghost hits pac-man game is over
 
 // Pac-man:
 // - Write pac-man functions -> move-top;right;down;left() - pacman moves forward unless the user changes direction by pressing arrow or there is a collision on the way
 // - Every time pac-man moves check if the current square contains a coin class or a magic fruit class, if so -> score points & remove existing class
-// - If pac-man eats magic fruit ghosts become vulnerable (could change appearance -> start flashing) and run away, ghost speed is decresed & timer starts
+// - If pac-man eats magic fruit ghosts become vulnerable (could change appearance -> start flashing) and run away, ghost speed is decresed & timer starts //! (A*) REVERSE
+//   => 
 // - If pac-man hits a ghost -> ghost goes back to its holding pen & score points, when timer is down the rules go back to normal. 
 
 // Display Results
@@ -257,6 +259,58 @@ function init() {
 
   }
 
+  // ! PATH FINDING ALGORITHM (A*)
+
+  // function findPath(level, startNode, finalNode)
+  // findPath returns an array of ordered node.cell indices forming the shortest path to the finalNode
+
+  // F(currentNode) = G(currentNode) + H(currentNode)
+  // F = number of nodes between startNode and finalNode (incl. finalNode)
+  // G = number of nodes between currentNode and currentNode (incl. currentNode)
+  // H = number of nodes between currentNode and finalNode (incl. finalNode; heuristic value)
+
+  // nodesToCheck = new Array -> Open a set of nodes to be checked
+  // nodesChecked = new Array -> Close a set of nodes that have been checked
+  // let currentNode = startNode -> First node currently being checked is startNode
+  // nodesToCheck.push(currentNode) -> Push startNode as first node to be checked
+  
+  // While nodesToCheck is not empty:
+  //    Check F for all nodes in nodesToCheck
+  //    Pick a node from nodesToCheck with the lowest F value
+  //    => for (let i = 0; i < nodesToCheck.lenght - 1) { if(nodesToCheck[i] < nodesToCheck[i + 1]) => lowestFIndex = i}
+  //    => This will skip the start Node since (i = 0) < (nodesToCheck.lenght = 1) - 1 => 0 < 0 is false
+  //    Check if currentNode === finalNode
+  //    => If true, break the loop and return the path
+  //       => path = new Array
+  //       => currentChild = currentNode
+  //       => While (currentChild.parent) -> Returns true if parent is a defined object
+  //          => path.push(currentChild) -> Add parent object to the path
+  //          => currentChild = currentChild.parent -> change hierarchy level
+  //          => return path.reverse() -> return path in reversed order, so it goes from starting node - the last child in hierarchy 
+  //    => If false, keep looping
+  //    Move currentNode from nodesToCheck to nodesChecked
+  //    => nodesChecked.push(currentNode)
+  //    => nodesToCheck.splice(currentNode, 1)
+  //    Identify adjacentNodes
+  //    => adjacentNodes = findAdjacent(currentNode) -> write a function that finds 4 adjacent nodes
+  //    Check if adjacentNode is not a solid cell or it has been already checked
+  //    =>if(adjacentNode.cell has a class 'solid' or nodesChecked.includes(adjacentNode)):
+  //    => If true, ignore and check next adjacentNode (continue)
+  //    => If false, check G and H of adjacentNode
+  //    => G has to be incremented currentNode.g value
+  //    => lowestNodeG = currentNode.G
+  //    => if adjacentNode does not exist on nodesToCheck list:
+  //       => If false, Add node to nodesToCheck list -> nodesToCheck.push(adjacentNode)
+  //       => Calculate adjacentNode.H = calculateH(adjacentNode)
+  //       => Update adjacentNode.G = currentNode.G + 1
+  //       => Update adjacentNode.F = calculateF(adjacentNode) -> adjacentNode.G + adjacentNode.H 
+  //       => adjacentNode.parent = currentNode -> Save new path stacking child elements in adjacentNode.parent property        
+  //    => else if => adjacentNode already exists on nodesToCheck list but this time it has lower G
+  //                  than the previous time it was checked. -> if(lowestNodeG < calculateGn(startNode, adjacentNode))
+  //               => Update adjacentNode.G = currentNode.G + 1
+  //               => Update adjacentNode.F = calculateF(adjacentNode) -> adjacentNode.G + adjacentNode.H     
+  //               => adjacentNode.parent = currentNode -> Update with a better path stacking child elements in adjacentNode.parent property 
+  // If nodesToCheck is empty - No solution found
 
   // ! SCORING POINTS
 
