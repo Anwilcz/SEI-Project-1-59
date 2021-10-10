@@ -144,7 +144,7 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      newNode.cell.innerText = `[${newNode.x}][${newNode.y} i:${newNode.index}]`
+      newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Building grid
@@ -262,15 +262,33 @@ function init() {
 
   // ! OPPONENT CONTROL MECHANICS
 
-  function changeOpponentPosition(level, opponentPosition) {
-    level.nodes[opponentPosition].cell.classList.add('opponent')
+  function changeOpponentPosition(level, node, index) {
+    level.nodes[node.index].cell.classList.add('opponent')
+    level.opponents[index].index = node.index
+    level.opponents[index].x = node.x
+    level.opponents[index].y = node.y
   }
 
-  function removeOpponentPosition(level, opponentPosition) {
-    level.nodes[opponentPosition].cell.classList.remove('opponent')
+  function removeOpponentPosition(level, node) {
+    level.nodes[node.index].cell.classList.remove('opponent')
   }
 
- 
+  let opponentInterval
+
+  function chasePlayer(level, index) {
+    opponentInterval = setInterval(function () {
+      let opponentNode = level.opponents[index]
+      const path = findPath(level, opponentNode, level.nodes[level.player.index])
+      removeOpponentPosition(level, opponentNode, index)
+      opponentNode = path[0]
+      changeOpponentPosition(level, opponentNode, index)
+      const adjacentNodes = findAdjacent(level, opponentNode)
+      if (adjacentNodes.includes(level.nodes[level.player.index])) {
+        clearInterval(opponentInterval)
+      }
+    }, 1000)
+    
+  }
 
   // ! PATH FINDING ALGORITHM (A*)
 
@@ -297,6 +315,11 @@ function init() {
 
   function findPath(level, startNode, finalNode) {
     // * findPath returns an array of ordered node.cell indices forming the shortest path to the finalNode
+    level.nodes.forEach(node => {
+      if (node.cell.classList.contains('path')) {
+        node.cell.classList.remove('path')
+      }
+    })
 
     // * Create open and closed sets of nodes
     const nodesToCheck = new Array // Open a set of nodes to be checked
@@ -326,6 +349,7 @@ function init() {
 
         while (currentChild.parent) { // Returns true if parent is a defined object
           path.push(currentChild) // Adds parent object to the path
+          level.nodes[currentChild.index].cell.classList.add('path')
           currentChild = currentChild.parent // change hierarchy level
         }
         path.forEach(node => node.cell.classList.add('path'))
@@ -402,6 +426,7 @@ function init() {
     document.addEventListener('keyup', handleKeyUp.bind(level))
     buildBoard(level)
     handleKeyUp(level)
+    chasePlayer(level, 0)
   }
 
   game(levelOne)
