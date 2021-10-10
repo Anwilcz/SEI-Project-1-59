@@ -48,11 +48,66 @@
 
 function init() {
 
-  const main = document.querySelector('main')
+  // ! GLOBAL VARIABLES
+
   const grid = document.querySelector('.grid')
+  const score = document.querySelector('#current-score')
+  const main = document.querySelector('main')
 
+  // ! OBJECTS STRUCTURE
 
-  const collisionsLvl1 = [
+  class Node {
+    constructor(cell, x, y) {
+      this.cell = cell
+      this.x = x
+      this.y = y
+    }
+  }
+
+  class Player {
+    constructor(index, level) {
+      this.index = index
+      this.startPosition = {
+        x: index % level.width,
+        y: Math.floor(index / level.width)
+      }
+      this.currentPosition = this.startPosition
+    }
+
+  }
+
+  class Opponent {
+    constructor(index, level) {
+      this.index = index
+      this.startPosition = {
+        x: index % level.width,
+        y: Math.floor(index / level.width)
+      }
+      this.currentPosition = this.startPosition
+    }
+  }
+
+  class Level {
+    constructor(name, width, height, playerName, playerIndex, magicPosition, opponentsIndices, collisions) {
+      this.name = name
+      this.width = width
+      this.height = height
+      this.nodes = new Array
+      this.player = new Player(playerIndex, this)
+      this.player.name = playerName
+      this.opponentsIndices = opponentsIndices
+      this.opponents = new Array
+      opponentsIndices.forEach(index => {
+        this.opponents.push(new Opponent(index, this))
+      })
+      this.magicPosition = magicPosition
+      this.collisions = collisions
+
+    }
+  }
+  // ! DEFINING LEVELS
+
+  const solidLvl1 = [
     24, 28, 31, 35,
     42, 46, 47, 48, 51, 52, 53, 57,
     62, 63, 64, 67, 68, 71, 72, 75, 76, 77,
@@ -73,145 +128,155 @@ function init() {
     365, 366, 373, 374
   ]
 
-  class Level {
-    constructor(name, width, height, startPOSN, currentPOSN, opponentsPOSN, magicFoodPOSN, cells, collisions, empty) {
-      this.name = name
-      this.width = width
-      this.height = height
-      this.startPOSN = startPOSN
-      this.currentPOSN = currentPOSN
-      this.opponentsPOSN = opponentsPOSN
-      this.magicFoodPOSN = magicFoodPOSN
-      this.cells = cells
-      this.collisions = collisions
-      this.empty = empty
-    }
-  }
+  const levelOne = new Level('Level 1', 20, 20, 'Cat', 21, 330, [138, 372, 225], solidLvl1)
 
-  const levelOne = new Level('Level 1', 20, 20, 21, 21, [138, 372, 225], 330, [], collisionsLvl1)
 
+
+  // ! BUILDING BOARD
 
   function buildBoard(level) {
-    // Building grid
+    // Crating nodes
     for (let i = 0; i < level.width * level.height; i++) {
-      const cell = document.createElement('div')
-      cell.classList.add('cell')
-      cell.innerText = i
-      level.cells.push(cell)
-      grid.appendChild(cell)
+      const newNode = new Node
+      newNode.cell = document.createElement('div')
+      newNode.x = i % level.width
+      newNode.y = Math.floor(i / level.width)
+      newNode.index = i
+      newNode.cell.innerText = `[${newNode.x}][${newNode.y} i:${newNode.index}]`
+      level.nodes.push(newNode)
     }
-    // Building solid cells
-    level.cells.forEach(cell => {
-      const index = level.cells.indexOf(cell)
-      if (((index + 1) % level.width === 0) || (index % level.width === 0) || ((index >= 0) && (index < level.width)) || (index >= (level.height * level.width) - level.width) || level.collisions.includes(index)) {
-        cell.classList.add('solid')
-        level.collisions.push(level.cells.indexOf(cell))
+    // Building grid
+    level.nodes.forEach(node => {
+      // Adding cell to grid
+      grid.appendChild(node.cell)
+      // Add cell styles
+      node.cell.classList.add('cell')
+      // Add player
+      if (node.index === level.player.index) {
+        node.cell.classList.add('player')
       }
-    })
-    // Identyfying empty cells
-    level.empty = level.cells.map(cell => level.cells.indexOf(cell)).filter(index => !level.collisions.includes(index))
-    // Adjusting width of main section
-    main.style.width = `${(level.cells[0].offsetWidth * level.width) + 2 * level.width}px`
-    // Adding player instance and opponents
-    level.cells[level.startPOSN].classList.add('player')
-    level.cells[level.magicFoodPOSN].classList.add('magic-food')
-    level.cells.forEach(cell => {
-      if (level.opponentsPOSN.includes(level.cells.indexOf(cell))) {
-        cell.classList.add('opponent')
+      // Add opponents
+      level.opponents.forEach(opponent => {
+        if (node.index === opponent.index) {
+          node.cell.classList.add('opponent')
+        }
+      })
+      // Add collisions
+      if (level.collisions.includes(node.index) || (node.x === 0) || (node.x === level.width - 1) || (node.y === 0) || (node.y === level.height - 1)) {
+        node.cell.classList.add('solid')
+        if (!(level.collisions.includes(node.index))) {
+          level.collisions.push(node.index)
+        }
       }
-    })
-    // Filling up empty fields with food
-    level.cells.forEach(cell => {
-      if (!(cell.classList.contains('player') || cell.classList.contains('magic-food') || cell.classList.contains('solid'))) {
-        cell.classList.add('food')
+      // Add magic food
+      if (node.index === level.magicPosition) {
+        node.cell.classList.add('magic-food')
       }
+      // Add food
+      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('opponent')) && !(node.cell.classList.contains('magic-food'))) {
+        node.cell.classList.add('food')
+      }
+
     })
+    // Adjusting main section size
+    main.style.width = `${(level.nodes[0].cell.offsetWidth * level.width) + 2 * level.width}px`
+
   }
-
-  // Handling key up
-
-
+  // ! GAME MECHANICS
   function changePOSN(level) {
-    level.cells[level.currentPOSN].classList.remove('food')
-    level.cells[level.currentPOSN].classList.add('player')
+    scorePoints(level)
+    level.nodes[level.player.index].cell.classList.remove('food')
+    level.nodes[level.player.index].cell.classList.remove('magic-food')
+    level.nodes[level.player.index].cell.classList.add('player')
   }
 
   function removePOSN(level) {
-    console.log(level)
-    level.cells[level.currentPOSN].classList.remove('player')
+    level.nodes[level.player.index].cell.classList.remove('player')
   }
 
   function moveRight(level) {
-    const myInterval = setInterval(function () {
-      if (level.empty.includes(level.currentPOSN + 1)) {
-        removePOSN(level)
-        level.currentPOSN++
-        changePOSN(level)
-      } else {
-        console.log('this should work')
-        clearInterval(myInterval)
-      }
-    }, 200)
+    if (!level.collisions.includes(level.player.index + 1)) {
+      removePOSN(level)
+      level.player.index++
+      level.player.currentPosition.x++
+      changePOSN(level)
+    } else {
+      clearInterval(myInterval)
+    }
   }
 
   function moveLeft(level) {
-    const myInterval = setInterval(function () {
-      if (level.empty.includes(level.currentPOSN - 1)) {
-        removePOSN(level)
-        level.currentPOSN--
-        changePOSN(level)
-      } else {
-        console.log('this should work')
-        clearInterval(myInterval)
-      }
-    }, 200)
+    if (!level.collisions.includes(level.player.index - 1)) {
+      removePOSN(level)
+      level.player.index--
+      level.player.currentPosition.x--
+      changePOSN(level)
+    } else {
+      clearInterval(myInterval)
+    }
   }
 
+  function moveUp(level) {
+    if (!level.collisions.includes(level.player.index - level.width)) {
+      removePOSN(level)
+      level.player.index -= level.width
+      level.player.currentPosition.y--
+      changePOSN(level)
+    } else {
+      clearInterval(myInterval)
+    }
+  }
+
+  function moveDown(level) {
+    if (!level.collisions.includes(level.player.index + level.width)) {
+      removePOSN(level)
+      level.player.index += level.width
+      level.player.currentPosition.y++
+      changePOSN(level)
+    } else {
+      clearInterval(myInterval)
+    }
+  }
+
+  let myInterval = setInterval(handleKeyUp, 300,)
 
   function handleKeyUp(event) {
-    
     const key = event.keyCode
-    removePOSN(this)
-    if (key === 39) {
-      moveRight(this)
-    } else if (key === 37) {
-      moveLeft(this)
-    } else if (key === 38 && this.empty.includes(this.currentPOSN - this.width)) {
-      console.log('UP')
-      this.currentPOSN -= this.width
-    } else if (key === 40 && this.empty.includes(this.currentPOSN + this.width)) {
-      console.log('DOWN')
-      this.currentPOSN += this.width
-    } else {
-      console.log('INVALID KEY')
-    }
-    changePOSN(this)
+    clearInterval(myInterval)
+    myInterval = setInterval(function () {
+      if (key === 39) {
+        moveRight(this)
+      } else if (key === 37) {
+        moveLeft(this)
+      } else if (key === 38) {
+        moveUp(this)
+      } else if (key === 40) {
+        moveDown(this)
+      }
+    }.bind(this), 300)
+
   }
 
 
+  // ! SCORING POINTS
 
+  function scorePoints(level) {
+    if (level.nodes[level.player.index].cell.classList.contains('food')) {
+      score.innerText = Number(score.innerText) + 100
+    } else if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
+      score.innerText = Number(score.innerText) + 1000
+    }
+  }
 
-
-
-  // Main function
+  // ! INVOKING FUNCTIONS
 
   function game(level) {
     document.addEventListener('keyup', handleKeyUp.bind(level))
     buildBoard(level)
     handleKeyUp(level)
-
   }
 
   game(levelOne)
-
-
-
-
-
-
-
-
-
 
 }
 
