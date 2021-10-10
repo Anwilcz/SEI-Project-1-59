@@ -185,6 +185,7 @@ function init() {
 
   }
   // ! PLAYER CONTROL MECHANICS
+  let movementDirection = ''
 
   function changePlayerPosition(level) {
     scorePoints(level)
@@ -199,6 +200,7 @@ function init() {
 
   function moveRight(level) {
     if (!level.collisions.includes(level.player.index + 1)) {
+      movementDirection = 'right'
       removePlayerPosition(level)
       level.player.index++
       level.player.currentPosition.x++
@@ -210,6 +212,7 @@ function init() {
 
   function moveLeft(level) {
     if (!level.collisions.includes(level.player.index - 1)) {
+      movementDirection = 'left'
       removePlayerPosition(level)
       level.player.index--
       level.player.currentPosition.x--
@@ -221,6 +224,7 @@ function init() {
 
   function moveUp(level) {
     if (!level.collisions.includes(level.player.index - level.width)) {
+      movementDirection = 'up'
       removePlayerPosition(level)
       level.player.index -= level.width
       level.player.currentPosition.y--
@@ -232,6 +236,7 @@ function init() {
 
   function moveDown(level) {
     if (!level.collisions.includes(level.player.index + level.width)) {
+      movementDirection = 'down'
       removePlayerPosition(level)
       level.player.index += level.width
       level.player.currentPosition.y++
@@ -274,7 +279,7 @@ function init() {
   }
 
   let opponentInterval
-
+  // Red ghost
   function chasePlayer(level, index) {
     opponentInterval = setInterval(function () {
       let opponentNode = level.opponents[index]
@@ -287,7 +292,69 @@ function init() {
         clearInterval(opponentInterval)
       }
     }, 1000)
-    
+  }
+  // Pink ghost
+  function targetFourAhead(level, index) {
+    opponentInterval = setInterval(function () {
+      const targetNode = findTargetFourAhead(level)
+      let opponentNode = level.opponents[index]
+      const path = findPath(level, opponentNode, targetNode)
+      removeOpponentPosition(level, opponentNode, index)
+      opponentNode = path[0]
+      changeOpponentPosition(level, opponentNode, index)
+      const adjacentNodes = findAdjacent(level, opponentNode)
+      if (adjacentNodes.includes(level.nodes[level.player.index])) {
+        clearInterval(opponentInterval)
+      }
+    }, 1000)
+  }
+
+  function findTargetFourAhead(level) {
+    const x = level.player.x
+    const y = level.player.y
+    let targetNode
+    while (!targetNode) {
+      if (movementDirection === 'right') {
+        targetNode = level.nodes.find(node => {
+          ((node.x === x + 4 && node.y === y) ||
+            (node.x === x + 3 && ((node.y === y + 1) || (node.y === y - 1))) ||
+            (node.x === x + 2 && ((node.y === y + 2) || (node.y === y - 2))) ||
+            (node.x === x + 1 && ((node.y === y + 3) || (node.y === y - 3))) ||
+            (node.x === x && ((node.y === y + 4) || (node.y === y - 4)))) && !(node.cell.classList.contains('solid'))
+        })
+        console.log('right')
+      } else if (movementDirection === 'left') {
+        targetNode = level.nodes.find(node => {
+          ((node.x === x - 4 && node.y === y) ||
+            (node.x === x - 3 && ((node.y === y + 1) || (node.y === y - 1))) ||
+            (node.x === x - 2 && ((node.y === y + 2) || (node.y === y - 2))) ||
+            (node.x === x - 1 && ((node.y === y + 3) || (node.y === y - 3))) ||
+            (node.x === x && ((node.y === y + 4) || (node.y === y - 4)))) && !(node.cell.classList.contains('solid'))
+        })
+        console.log('left')
+      } else if (movementDirection === 'up') {
+        targetNode = level.nodes.find(node => {
+          ((node.y === y + 4 && node.x === x) ||
+            (node.y === y + 3 && ((node.x === x + 1) || (node.x === x - 1))) ||
+            (node.y === y + 2 && ((node.x === x + 2) || (node.y === x - 2))) ||
+            (node.y === y + 1 && ((node.x === x + 3) || (node.y === x - 3))) ||
+            (node.y === y && ((node.x === x + 4) || (node.x === x - 4)))) && !(node.cell.classList.contains('solid'))
+        })
+        console.log('up')
+      } else if (movementDirection === 'down') {
+        targetNode = level.nodes.find(node => {
+          ((node.y === y - 4 && node.x === x) ||
+            (node.y === y - 3 && ((node.x === x + 1) || (node.x === x - 1))) ||
+            (node.y === y - 2 && ((node.x === x + 2) || (node.y === x - 2))) ||
+            (node.y === y - 1 && ((node.x === x + 3) || (node.y === x - 3))) ||
+            (node.y === y && ((node.x === x + 4) || (node.x === x - 4)))) && !(node.cell.classList.contains('solid'))
+        })
+        console.log('down')
+      }
+      if (targetNode) {
+        return targetNode
+      }
+    }
   }
 
   // ! PATH FINDING ALGORITHM (A*)
@@ -427,6 +494,7 @@ function init() {
     buildBoard(level)
     handleKeyUp(level)
     chasePlayer(level, 0)
+    // targetFourAhead(level, 1)
   }
 
   game(levelOne)
