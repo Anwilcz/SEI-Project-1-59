@@ -108,20 +108,20 @@ footer {
   background-repeat: no-repeat;
 }
 
-.opponent1 {
-  background-image: url('../Assets/dog.gif') !important; 
+.red-opponent {
+  background-image: url('../Assets/ghost.gif') !important;  
   background-size: 28px !important;
 
 }
 
-.opponent2 {
-  background-image: url('../Assets/dog.gif') !important; 
+.pink-opponent {
+  background-image: url('../Assets/ghost.gif') !important;  
   background-size: 28px !important;
 
 }
 
-.opponent3 {
-  background-image: url('../Assets/dog.gif') !important; 
+.blue-opponent {
+  background-image: url('../Assets/ghost.gif') !important;  
   background-size: 28px !important;
 
 }
