@@ -132,7 +132,7 @@ function init() {
     365, 366, 373, 374
   ]
 
-  const levelOne = new Level('Level 1', 20, 20, 'Cat', 21, 330, [138, 372, 225], solidLvl1)
+  const levelOne = new Level('Level 1', 20, 20, 'Cat', 21, 23, [138, 372, 225], solidLvl1)
 
 
 
@@ -162,7 +162,13 @@ function init() {
       // Add opponents
       level.opponents.forEach(opponent => {
         if (node.index === opponent.index) {
-          node.cell.classList.add('opponent')
+          if (level.opponents.indexOf(opponent) === 0) {
+            node.cell.classList.add('opponent1')
+          } else if (level.opponents.indexOf(opponent) === 1) {
+            node.cell.classList.add('opponent2')
+          } else {
+            node.cell.classList.add('opponent3')
+          }
         }
       })
       // Add collisions
@@ -177,7 +183,7 @@ function init() {
         node.cell.classList.add('magic-food')
       }
       // Add food
-      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('opponent')) && !(node.cell.classList.contains('magic-food'))) {
+      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('opponent1') || node.cell.classList.contains('opponent2') || node.cell.classList.contains('opponent3')) && !(node.cell.classList.contains('magic-food'))) {
         node.cell.classList.add('food')
       }
 
@@ -190,6 +196,12 @@ function init() {
 
   function changePlayerPosition(level) {
     scorePoints(level)
+    if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
+      shockMode(level) // Need to add shock mode to chasePlayer, moveRandomly and taargetFourAhead
+      // May need to add boolean value to control player vulnerability to ghosts
+      // player kills ghosts when mode is on
+      // They come back to their original positions and then leave after some time
+    }
     level.nodes[level.player.index].cell.classList.remove('food')
     level.nodes[level.player.index].cell.classList.remove('magic-food')
     level.nodes[level.player.index].cell.classList.add('player')
@@ -257,7 +269,7 @@ function init() {
     const key = event.keyCode
     clearInterval(playerInterval)
     playerInterval = setInterval(function () {
-      if (gameOver === false) {
+      if (!gameOver) {
         if (key === 39) {
           movementDirection = 'right'
           moveRight(this)
@@ -278,8 +290,20 @@ function init() {
   // ! OPPONENT CONTROL MECHANICS
 
   function changeOpponentPosition(level, targetNode, index) {
-    if (!targetNode.cell.classList.contains('opponent')) {
-      level.nodes[targetNode.index].cell.classList.add('opponent')
+    let noClass = false
+    if (!targetNode.cell.classList.contains('opponent1')) {
+      level.nodes[targetNode.index].cell.classList.add('opponent1')
+      noClass = true
+    }
+    if (!targetNode.cell.classList.contains('opponent2')) {
+      level.nodes[targetNode.index].cell.classList.add('opponent2')
+      noClass = true
+    }
+    if (!targetNode.cell.classList.contains('opponent3')) {
+      level.nodes[targetNode.index].cell.classList.add('opponent3')
+      noClass = true
+    }
+    if (noClass) {
       level.opponents[index].index = targetNode.index
       level.opponents[index].x = targetNode.x
       level.opponents[index].y = targetNode.y
@@ -287,24 +311,31 @@ function init() {
   }
 
   function removeOpponentPosition(level, targetNode, currentNode) {
-    if (!targetNode.cell.classList.contains('opponent')) {
-      level.nodes[currentNode.index].cell.classList.remove('opponent')
+    if (!targetNode.cell.classList.contains('opponent1')) {
+      level.nodes[currentNode.index].cell.classList.remove('opponent1')
+    }
+    if (!targetNode.cell.classList.contains('opponent2')) {
+      level.nodes[currentNode.index].cell.classList.remove('opponent2')
+    }
+    if (!targetNode.cell.classList.contains('opponent3')) {
+      level.nodes[currentNode.index].cell.classList.remove('opponent3')
     }
   }
 
-  let redInterval
+  let targetPlayerInterval
   // * Red Ghost Logic
   function chasePlayer(level, index) {
-    redInterval = setInterval(function () {
+    clearInterval(targetPlayerInterval)
+    targetPlayerInterval = setInterval(function () {
       ghostFoundPlayer(level)
-      if (gameOver === false) {
+      if (!gameOver) {
         const opponentCurrentNode = level.opponents[index]
         const path = findPath(level, opponentCurrentNode, level.nodes[level.player.index])
         const opponentTargetNode = path[0]
         removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
         changeOpponentPosition(level, opponentTargetNode, index)
       } else {
-        clearInterval(redInterval)
+        clearInterval(targetPlayerInterval)
       }
     }, 1000)
   }
@@ -312,9 +343,10 @@ function init() {
 
   let targetFourInterval
   function targetFourAhead(level, index) {
+    clearInterval(targetFourInterval)
     targetFourInterval = setInterval(function () {
       const opponentCurrentNode = level.opponents[index]
-      if (gameOver === false) {
+      if (!gameOver) {
         let opponentTargetNode = findTargetFourAhead(level)
         if (opponentTargetNode === undefined) {
           clearInterval(targetFourInterval)
@@ -394,6 +426,7 @@ function init() {
 
 
   function moveRandomly(level, index) {
+    clearInterval(randomMoveInterval)
     if (randomPath.length === 0) {
       randomPath.push(level.nodes[level.opponents[2].index - 1])
     }
@@ -402,11 +435,11 @@ function init() {
       const opponentPreviousNode = randomPath[randomPath.length - 1]
       let opponentTargetNode
       //randomPath.push(opponentCurrentNode)
-      if (gameOver === false) {
+      if (!gameOver) {
         let adjacentNodes = findAdjacent(level, opponentCurrentNode)
         adjacentNodes.splice(adjacentNodes.indexOf(opponentPreviousNode), 1)
         adjacentNodes = adjacentNodes.filter(node => !(node.cell.classList.contains('solid')))
-        opponentTargetNode = adjacentNodes[Math.floor(Math.random() * (adjacentNodes.length))]  
+        opponentTargetNode = adjacentNodes[Math.floor(Math.random() * (adjacentNodes.length))]
         randomPath.push(opponentCurrentNode)
         randomPath.shift()
         removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
@@ -418,12 +451,62 @@ function init() {
     }, 1000)
   }
 
+  // ! SHOCK MODE FUNCTIONS
+
+  function shockMode(level) {
+    let shockMode = true
+    // breaks normal move movements
+    runAway(level)
+  }
+
+  function runAway(level) {
+    clearInterval(randomMoveInterval)
+    clearInterval(targetPlayerInterval)
+    clearInterval(targetFourInterval)
+    targetCorner(level, 0)
+    targetCorner(level, 1)
+    targetCorner(level, 2)
+  }
+
+  let targetCornerInterval
+  function targetCorner(level, index) {
+    let cornerIndex
+    // ghostFoundPlayer(level) //! Player found ghost?
+    if (!gameOver) { // Need something to switch this
+      const opponentCurrentNode = level.opponents[index]
+      
+      if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
+        cornerIndex = level.nodes.length - (level.width + 2)
+        level.nodes[cornerIndex].cell.style.backgroundColor = 'lightyellow'
+      } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y > ((level.height / 2) - 1))) {//ok
+        cornerIndex = level.nodes.length - ((2 * level.width) - 1)
+        level.nodes[cornerIndex].cell.style.backgroundColor = 'lightgreen'
+      } else if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y < (level.height / 2))) {
+        cornerIndex = ((2 * level.width) - 2)
+        level.nodes[cornerIndex].cell.style.backgroundColor = 'red'
+      } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y < (level.height / 2))) {
+        cornerIndex = (level.width + 1)
+        level.nodes[cornerIndex].cell.style.backgroundColor = 'blue'
+      }
+      targetCornerInterval = setInterval(function () {
+        const path = findPath(level, opponentCurrentNode, level.nodes[cornerIndex])
+        const opponentTargetNode = path[0]
+        
+        removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
+        changeOpponentPosition(level, opponentTargetNode, index)
+      }, 1000)
+    } else {
+      clearInterval(targetCornerInterval)
+    }
+  }
+
+
 
   // ! GAME OVER FUNCTIONS
 
   function ghostFoundPlayer(level) {
     const adjacentNodes = findAdjacent(level, level.nodes[level.player.index])
-    if (adjacentNodes.some(node => node.cell.classList.contains('opponent'))) {
+    if (adjacentNodes.some(node => (node.cell.classList.contains('opponent2') || node.cell.classList.contains('opponent3') || node.cell.classList.contains('opponent1')))) {
       console.log('game over')
       gameOver = true
     }

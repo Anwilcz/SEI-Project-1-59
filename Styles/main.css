@@ -108,7 +108,19 @@ footer {
   background-repeat: no-repeat;
 }
 
-.opponent {
+.opponent1 {
+  background-image: url('../Assets/dog.gif') !important; 
+  background-size: 28px !important;
+
+}
+
+.opponent2 {
+  background-image: url('../Assets/dog.gif') !important; 
+  background-size: 28px !important;
+
+}
+
+.opponent3 {
   background-image: url('../Assets/dog.gif') !important; 
   background-size: 28px !important;
 
