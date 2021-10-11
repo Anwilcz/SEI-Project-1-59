@@ -240,7 +240,7 @@ function init() {
 
   function moveDown(level) {
     if (!level.collisions.includes(level.player.index + level.width)) {
-      
+
       removePlayerPosition(level)
       level.player.index += level.width
       level.player.currentPosition.y++
@@ -293,7 +293,7 @@ function init() {
   }
 
   let redInterval
-  // Red ghost
+  // * Red Ghost Logic
   function chasePlayer(level, index) {
     redInterval = setInterval(function () {
       ghostFoundPlayer(level)
@@ -308,16 +308,16 @@ function init() {
       }
     }, 1000)
   }
-  // Pink ghost
-  // targetFourAhead to be invoked after moveLeft/Right/Top/Down
-  let pinkInterval
+  // * Pink Ghost Logic
+
+  let targetFourInterval
   function targetFourAhead(level, index) {
-    pinkInterval = setInterval(function () {
+    targetFourInterval = setInterval(function () {
       const opponentCurrentNode = level.opponents[index]
       if (gameOver === false) {
         let opponentTargetNode = findTargetFourAhead(level)
         if (opponentTargetNode === undefined) {
-          clearInterval(pinkInterval)
+          clearInterval(targetFourInterval)
           return
         } else {
           const path = findPath(level, opponentCurrentNode, opponentTargetNode)
@@ -326,17 +326,9 @@ function init() {
           changeOpponentPosition(level, opponentTargetNode, index)
         }
       } else {
-        clearInterval(pinkInterval)
+        clearInterval(targetFourInterval)
       }
     }, 1000)
-  }
-
-  function ghostFoundPlayer(level) {
-    const adjacentNodes = findAdjacent(level, level.nodes[level.player.index])
-    if (adjacentNodes.some(node => node.cell.classList.contains('opponent'))) {
-      console.log('game over')
-      gameOver = true
-    } 
   }
 
   function findTargetFourAhead(level) {
@@ -352,7 +344,7 @@ function init() {
       selectedNodes.push(selectedNode)
       selectedNode = (level.nodes.find(node => (node.x === x + 2) && ((node.y === y + 2) || (node.y === y - 2))))
       selectedNodes.push(selectedNode)
-      console.log('right')
+      //console.log('right')
     }
     if (movementDirection === 'left') {
       selectedNode = (level.nodes.find(node => (node.x === x - 4) && (node.y === y)))
@@ -361,7 +353,7 @@ function init() {
       selectedNodes.push(selectedNode)
       selectedNode = (level.nodes.find(node => (node.x === x - 2) && ((node.y === y + 2) || (node.y === y - 2))))
       selectedNodes.push(selectedNode)
-      console.log('left')
+      //console.log('left')
     }
     if (movementDirection === 'up') {
       selectedNode = (level.nodes.find(node => (node.y === y - 4) && (node.x === x)))
@@ -370,7 +362,7 @@ function init() {
       selectedNodes.push(selectedNode)
       selectedNode = (level.nodes.find(node => (node.y === y - 2) && ((node.x === x + 2) || (node.x === x - 2))))
       selectedNodes.push(selectedNode)
-      console.log('up')
+      //console.log('up')
     }
     if (movementDirection === 'down') {
       selectedNode = (level.nodes.find(node => (node.y === y + 4) && (node.x === x)))
@@ -379,20 +371,62 @@ function init() {
       selectedNodes.push(selectedNode)
       selectedNode = (level.nodes.find(node => (node.y === y + 2) && ((node.x === x + 2) || (node.x === x - 2))))
       selectedNodes.push(selectedNode)
-      console.log('down')
+      //console.log('down')
     }
     if (selectedNodes.length > 0 && selectedNodes.some(node => node !== undefined)) {
       selectedNodes = selectedNodes.filter(node => !node.cell.classList.contains('solid') && node !== undefined)
       targetNode = selectedNodes[0]
-      console.log(targetNode)
+      //console.log(targetNode)
       targetNode.cell.style.backgroundColor = 'pink'
       return targetNode
     } else {
-      targetNode = level.nodes[level.player.index] 
+      targetNode = level.nodes[level.player.index]
       targetNode.cell.style.backgroundColor = 'pink'
-      return targetNode 
+      return targetNode
     }
-    
+
+  }
+
+  // * Blue ghost logic
+
+  let randomMoveInterval
+  const randomPath = new Array
+
+
+  function moveRandomly(level, index) {
+    if (randomPath.length === 0) {
+      randomPath.push(level.nodes[level.opponents[2].index - 1])
+    }
+    randomMoveInterval = setInterval(function () {
+      const opponentCurrentNode = level.nodes[level.opponents[index].index]
+      const opponentPreviousNode = randomPath[randomPath.length - 1]
+      let opponentTargetNode
+      //randomPath.push(opponentCurrentNode)
+      if (gameOver === false) {
+        let adjacentNodes = findAdjacent(level, opponentCurrentNode)
+        adjacentNodes.splice(adjacentNodes.indexOf(opponentPreviousNode), 1)
+        adjacentNodes = adjacentNodes.filter(node => !(node.cell.classList.contains('solid')))
+        opponentTargetNode = adjacentNodes[Math.floor(Math.random() * (adjacentNodes.length))]  
+        randomPath.push(opponentCurrentNode)
+        randomPath.shift()
+        removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
+        changeOpponentPosition(level, opponentTargetNode, index)
+        opponentTargetNode.cell.style.backgroundColor = 'lightblue'
+      } else {
+        clearInterval(randomMoveInterval)
+      }
+    }, 1000)
+  }
+
+
+  // ! GAME OVER FUNCTIONS
+
+  function ghostFoundPlayer(level) {
+    const adjacentNodes = findAdjacent(level, level.nodes[level.player.index])
+    if (adjacentNodes.some(node => node.cell.classList.contains('opponent'))) {
+      console.log('game over')
+      gameOver = true
+    }
   }
 
   // ! PATH FINDING ALGORITHM (A*)
@@ -533,6 +567,7 @@ function init() {
     handleKeyUp(level)
     chasePlayer(level, 0)
     targetFourAhead(level, 1)
+    moveRandomly(level, 2)
 
   }
 
