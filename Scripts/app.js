@@ -474,7 +474,7 @@ function init() {
     // ghostFoundPlayer(level) //! Player found ghost?
     if (!gameOver) { // Need something to switch this
       const opponentCurrentNode = level.opponents[index]
-      
+
       if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
         cornerIndex = level.nodes.length - (level.width + 2)
         level.nodes[cornerIndex].cell.style.backgroundColor = 'lightyellow'
@@ -489,11 +489,14 @@ function init() {
         level.nodes[cornerIndex].cell.style.backgroundColor = 'blue'
       }
       targetCornerInterval = setInterval(function () {
-        const path = findPath(level, opponentCurrentNode, level.nodes[cornerIndex])
-        const opponentTargetNode = path[0]
-        
-        removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
-        changeOpponentPosition(level, opponentTargetNode, index)
+        if (level.opponents[index].index === cornerIndex) {
+          clearInterval(targetCornerInterval)
+        } else {
+          const path = findPath(level, opponentCurrentNode, level.nodes[cornerIndex])
+          const opponentTargetNode = path[0]
+          removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode)
+          changeOpponentPosition(level, opponentTargetNode, index)
+        }
       }, 1000)
     } else {
       clearInterval(targetCornerInterval)
