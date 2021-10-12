@@ -162,10 +162,10 @@ function init() {
       }
       // Add opponents
       level.opponents[0].color = 'red'
-      level.opponents[1].color = 'green'
+      level.opponents[1].color = 'pink'
       level.opponents[2].color = 'blue'
       level.nodes[level.opponents[0].index].cell.classList.add('red-opponent')
-      level.nodes[level.opponents[1].index].cell.classList.add('green-opponent')
+      level.nodes[level.opponents[1].index].cell.classList.add('pink-opponent')
       level.nodes[level.opponents[2].index].cell.classList.add('blue-opponent')
       // Add collisions
       if (level.collisions.includes(node.index) || (node.x === 0) || (node.x === level.width - 1) || (node.y === 0) || (node.y === level.height - 1)) {
@@ -175,7 +175,7 @@ function init() {
         }
       }
       // Add food
-      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('red-opponent') || node.cell.classList.contains('green-opponent') || node.cell.classList.contains('blue-opponent')) && !(node.cell.classList.contains('magic-food'))) {
+      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('red-opponent') || node.cell.classList.contains('pink-opponent') || node.cell.classList.contains('blue-opponent')) && !(node.cell.classList.contains('magic-food'))) {
         node.cell.classList.add('food')
       }
 
@@ -289,8 +289,8 @@ function init() {
       level.nodes[targetNode.index].cell.classList.add('red-opponent')
       noClass = true
     }
-    if (!targetNode.cell.classList.contains('green-opponent') && index === 1) {
-      level.nodes[targetNode.index].cell.classList.add('green-opponent')
+    if (!targetNode.cell.classList.contains('pink-opponent') && index === 1) {
+      level.nodes[targetNode.index].cell.classList.add('pink-opponent')
       noClass = true
     }
     if (!targetNode.cell.classList.contains('blue-opponent') && index === 2) {
@@ -308,8 +308,8 @@ function init() {
     if (!targetNode.cell.classList.contains('red-opponent') && index === 0) {
       level.nodes[currentNode.index].cell.classList.remove('red-opponent')
     }
-    if (!targetNode.cell.classList.contains('green-opponent') && index === 1) {
-      level.nodes[currentNode.index].cell.classList.remove('green-opponent')
+    if (!targetNode.cell.classList.contains('pink-opponent') && index === 1) {
+      level.nodes[currentNode.index].cell.classList.remove('pink-opponent')
     }
     if (!targetNode.cell.classList.contains('blue-opponent') && index === 2) {
       level.nodes[currentNode.index].cell.classList.remove('blue-opponent')
@@ -333,7 +333,7 @@ function init() {
       }
     }, 1000)
   }
-  // * green Ghost Logic
+  // * Pink Ghost Logic
 
   let targetFourInterval
   function targetFourAhead(level, index) {
@@ -403,11 +403,11 @@ function init() {
       selectedNodes = selectedNodes.filter(node => !node.cell.classList.contains('solid') && node !== undefined)
       targetNode = selectedNodes[0]
       //console.log(targetNode)
-      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190,10,10, 0.6)'
+      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(5, 120, 10, 0.6)'
       return targetNode
     } else {
       targetNode = level.nodes[level.player.index]
-      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 10, 10, 0.6)'
+      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(0, 113, 7, 0.6)'
       return targetNode
     }
 
@@ -484,7 +484,7 @@ function init() {
         level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 0, 0, 0.6)'
       } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y < (level.height / 2))) {
         cornerIndex = (level.width + 1)
-        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(230, 145, 0, 0.6)'
+        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(0, 105, 115, 0.6)'
       }
       interval = setInterval(function () {
         if (level.opponents[index].index === cornerIndex) {
@@ -515,7 +515,7 @@ function init() {
   function ghostFoundPlayer(level) {
     const adjacentNodes = findAdjacent(level, level.nodes[level.player.index])
 
-    if (adjacentNodes.some(node => (node.cell.classList.contains('green-opponent') || node.cell.classList.contains('blue-opponent') || node.cell.classList.contains('red-opponent')))) {
+    if (adjacentNodes.some(node => (node.cell.classList.contains('pink-opponent') || node.cell.classList.contains('blue-opponent') || node.cell.classList.contains('red-opponent')))) {
       if (!shockMode) {
         console.log('game over')
         gameOver = true
@@ -524,8 +524,8 @@ function init() {
         if (adjacentNodes.some(node => (node.cell.classList.contains('red-opponent')))) {
           level.nodes.forEach(node => node.cell.classList.remove('red-opponent'))
           ghostKilled = true
-        } else if (adjacentNodes.some(node => (node.cell.classList.contains('green-opponent')))) {
-          level.nodes.forEach(node => node.cell.classList.remove('green-opponent'))
+        } else if (adjacentNodes.some(node => (node.cell.classList.contains('pink-opponent')))) {
+          level.nodes.forEach(node => node.cell.classList.remove('pink-opponent'))
           ghostKilled = true
         } else if (adjacentNodes.some(node => (node.cell.classList.contains('blue-opponent')))) {
           level.nodes.forEach(node => node.cell.classList.remove('blue-opponent'))
