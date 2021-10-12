@@ -52,11 +52,16 @@ function init() {
 
   // ! GLOBAL VARIABLES
 
+  const startButton = document.querySelector('#start-button')
+  const restartButton = document.querySelector('#restart-button')
   const grid = document.querySelector('.grid')
   const score = document.querySelector('#current-score')
+  const foodCount = document.querySelector('#remaining-food')
+  const remainingTime = document.querySelector('#remaining-time')
   const main = document.querySelector('main')
   let gameOver = false
   let movementDirection = 'right'
+  let currentLevel = 1
 
   // ! OBJECTS STRUCTURE
 
@@ -92,8 +97,8 @@ function init() {
   }
 
   class Level {
-    constructor(name, width, height, playerName, playerIndex, magicPosition, opponentsIndices, collisions) {
-      this.name = name
+    constructor(number, width, height, playerName, playerIndex, magicPosition, opponentsIndices, collisions) {
+      this.number = number
       this.width = width
       this.height = height
       this.nodes = new Array
@@ -131,9 +136,7 @@ function init() {
     342, 343, 344, 345, 346, 348, 349, 350, 351, 353, 354, 355, 356, 357
   ]
 
-  const levelOne = new Level('Level 1', 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1)
-
-
+  const lvPar1 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1]
 
   // ! BUILDING BOARD
 
@@ -145,11 +148,14 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      // newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
+      newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Adding magic food
-    level.magicPosition.forEach(index => level.nodes[index].cell.classList.add('magic-food'))
+    level.magicPosition.forEach(index => {
+      foodCount.innerText = Number(foodCount.innerText) + 1
+      level.nodes[index].cell.classList.add('magic-food')
+    })
     // Building grid
     level.nodes.forEach(node => {
       // Adding cell to grid
@@ -175,10 +181,11 @@ function init() {
         }
       }
       // Add food
-      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('red-opponent') || node.cell.classList.contains('green-opponent') || node.cell.classList.contains('blue-opponent')) && !(node.cell.classList.contains('magic-food'))) {
+      if (!(node.cell.classList.contains('player')) && !(node.cell.classList.contains('solid')) && !(node.cell.classList.contains('magic-food'))) {
         node.cell.classList.add('food')
+        // Count food
+        foodCount.innerText = Number(foodCount.innerText) + 1
       }
-
     })
     // Adjusting main section size
     main.style.width = `${(level.nodes[0].cell.offsetWidth * level.width) + 2 * level.width}px`
@@ -363,6 +370,7 @@ function init() {
     let targetNode
     let selectedNode
     let selectedNodes = new Array
+    let timeout
     if (movementDirection === 'right') {
       selectedNode = (level.nodes.find(node => (node.x === x + 4) && (node.y === y)))
       selectedNodes.push(selectedNode)
@@ -404,10 +412,18 @@ function init() {
       targetNode = selectedNodes[0]
       //console.log(targetNode)
       targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190,10,10, 0.6)'
+      timeout = setTimeout(function () {
+        targetNode.cell.style.boxShadow = 'none'
+        clearTimeout(timeout)
+      }, 3000)
       return targetNode
     } else {
       targetNode = level.nodes[level.player.index]
       targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 10, 10, 0.6)'
+      timeout = setTimeout(function () {
+        targetNode.cell.style.boxShadow = 'none'
+        clearTimeout(timeout)
+      }, 3000)
       return targetNode
     }
 
@@ -470,22 +486,25 @@ function init() {
   function targetCorner(level, index, interval) {
     let cornerIndex
     let shockModeTimeout = undefined
+    let timeout
     // ghostFoundPlayer(level) //! Player found ghost?
     if (!gameOver) { // Need something to switch this
       const opponentCurrentNode = level.opponents[index]
       if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
         cornerIndex = level.nodes.length - (level.width + 2)
-        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(5, 120, 10, 0.6)'
       } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y > ((level.height / 2) - 1))) {//ok
         cornerIndex = level.nodes.length - ((2 * level.width) - 1)
-        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(0, 105, 115, 0.6)'
       } else if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y < (level.height / 2))) {
         cornerIndex = ((2 * level.width) - 2)
-        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 0, 0, 0.6)'
       } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y < (level.height / 2))) {
         cornerIndex = (level.width + 1)
-        level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(230, 145, 0, 0.6)'
+
       }
+      level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(230, 145, 0, 0.6)'
+      timeout = setTimeout(function () {
+        level.nodes[cornerIndex].cell.style.boxShadow = 'none'
+        clearTimeout(timeout)
+      }, 15000)
       interval = setInterval(function () {
         if (level.opponents[index].index === cornerIndex) {
           return
@@ -517,8 +536,8 @@ function init() {
 
     if (adjacentNodes.some(node => (node.cell.classList.contains('green-opponent') || node.cell.classList.contains('blue-opponent') || node.cell.classList.contains('red-opponent')))) {
       if (!shockMode) {
-        console.log('game over')
         gameOver = true
+        playerLost()
       }
       if (shockMode) {
         if (adjacentNodes.some(node => (node.cell.classList.contains('red-opponent')))) {
@@ -663,28 +682,96 @@ function init() {
   function scorePoints(level) {
     if (level.nodes[level.player.index].cell.classList.contains('food')) {
       score.innerText = Number(score.innerText) + 100
+      foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
       score.innerText = Number(score.innerText) + 1000
+      foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (ghostKilled) {
       score.innerText = Number(score.innerText) + 2000
       ghostKilled = false
     }
+    if (Number(foodCount.innerText) === 0) {
+      nextLevel(level)
+    }
   }
+  //! TIMERS
 
-  // ! INVOKING FUNCTIONS
+  function setTimers() {
+    let countSeconds
+    let timeForGame
+    countSeconds = setInterval(function () {
+      if (Number(remainingTime.innerText) === 1) {
+        gameOver = true
+      }
+      if (Number(remainingTime.innerText) === 1 || restart === true || gameOver === true) {
+        clearInterval(countSeconds)
+        clearTimeout(timeForGame)
+      }
+      remainingTime.innerText = Number(remainingTime.innerText) - 1
+    }, 1000)
+    timeForGame = setTimeout(function () {
+      clearInterval(countSeconds)
+      clearTimeout(timeForGame)
+    }, 300000)
+  }
+  // ! MAIN FUNCTIONS
+
+  let restart = false
+
+
   function normalMode(level) {
+    document.addEventListener('keyup', handleKeyUp.bind(level))
     handleKeyUp(level)
     chasePlayer(level, 0)
     targetFourAhead(level, 1)
     moveRandomly(level, 2)
   }
   function game(level) {
-    document.addEventListener('keyup', handleKeyUp.bind(level))
+    restart = false
     buildBoard(level)
-    normalMode(level)
+    startButton.addEventListener('click', function () {
+      normalMode(level)
+      setTimers()
+    }, { once: true })
   }
 
-  game(levelOne)
+  function nextLevel(level) {
+    const nextLevel = level.number + 1
+    game(nextLevel)
+  }
+
+  function playerLost() { // pop up message here
+    restartButton.addEventListener('click', function() {
+      restartLevel()
+    } , { once: true })
+  }
+
+  function restartLevel() {
+    remainingTime.innerText = '300'
+    foodCount.innerText = '0'
+    score.innerText = '0'
+    while (grid.firstChild) {
+      grid.removeChild(grid.firstChild)
+    }
+    restart = true
+    let p
+    if (currentLevel === 1) {
+      p = lvPar1
+    }// else if (level.number === 2) {
+      //   p = lvPar2
+      // } else if (level.number === 3) {
+        //   p = lvPar3
+        // }
+    const level = new Level(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7])
+    gameOver = false
+    game(level)
+  }
+
+
+  // ! INVOKING FUNCTIONS
+
+
+  restartLevel()
 
 
 }
