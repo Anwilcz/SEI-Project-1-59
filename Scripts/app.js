@@ -54,11 +54,15 @@ function init() {
 
   const startButton = document.querySelector('#start-button')
   const restartButton = document.querySelector('#restart-button')
+  const continueButton = document.createElement('button')
   const grid = document.querySelector('.grid')
   const score = document.querySelector('#current-score')
   const foodCount = document.querySelector('#remaining-food')
   const remainingTime = document.querySelector('#remaining-time')
   const main = document.querySelector('main')
+  const content = document.querySelector('.content')
+  const popUpScreen = document.createElement('div')
+  popUpScreen.classList.add('pop-up')
   let gameOver = false
   let movementDirection = 'right'
   let currentLevel = 1
@@ -97,7 +101,7 @@ function init() {
   }
 
   class Level {
-    constructor(number, width, height, playerName, playerIndex, magicPosition, opponentsIndices, collisions) {
+    constructor(number, width, height, playerName, playerIndex, magicPosition, opponentsIndices, collisions, time) {
       this.number = number
       this.width = width
       this.height = height
@@ -111,7 +115,8 @@ function init() {
       })
       this.magicPosition = magicPosition
       this.collisions = collisions
-
+      this.score = score
+      this.time = time
     }
   }
   // ! DEFINING LEVELS
@@ -136,7 +141,8 @@ function init() {
     342, 343, 344, 345, 346, 348, 349, 350, 351, 353, 354, 355, 356, 357
   ]
 
-  const lvPar1 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1]
+  const lvPar1 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1, 300]
+  const lvPar2 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1, 300]
 
   // ! BUILDING BOARD
 
@@ -148,7 +154,7 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
+      // newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Adding magic food
@@ -291,6 +297,9 @@ function init() {
   // ! OPPONENT CONTROL MECHANICS
 
   function changeOpponentPosition(level, targetNode, index) {
+    if (targetNode === undefined) {
+      return
+    }
     let noClass = false
     if (!targetNode.cell.classList.contains('red-opponent') && index === 0) {
       level.nodes[targetNode.index].cell.classList.add('red-opponent')
@@ -312,6 +321,9 @@ function init() {
   }
 
   function removeOpponentPosition(level, targetNode, currentNode, index) {
+    if (targetNode === undefined) {
+      return
+    }
     if (!targetNode.cell.classList.contains('red-opponent') && index === 0) {
       level.nodes[currentNode.index].cell.classList.remove('red-opponent')
     }
@@ -321,6 +333,7 @@ function init() {
     if (!targetNode.cell.classList.contains('blue-opponent') && index === 2) {
       level.nodes[currentNode.index].cell.classList.remove('blue-opponent')
     }
+
   }
 
   let targetPlayerInterval
@@ -370,7 +383,6 @@ function init() {
     let targetNode
     let selectedNode
     let selectedNodes = new Array
-    let timeout
     if (movementDirection === 'right') {
       selectedNode = (level.nodes.find(node => (node.x === x + 4) && (node.y === y)))
       selectedNodes.push(selectedNode)
@@ -407,27 +419,25 @@ function init() {
       selectedNodes.push(selectedNode)
       //console.log('down')
     }
-    if (selectedNodes.length > 0 && selectedNodes.some(node => node !== undefined)) {
-      selectedNodes = selectedNodes.filter(node => !node.cell.classList.contains('solid') && node !== undefined)
+
+    selectedNodes = selectedNodes.filter(node => Boolean(node) === true) // removing undefined nodes
+
+    if (selectedNodes.length > 0) {
+      selectedNodes = selectedNodes.filter(node => (!node.cell.classList.contains('solid')))
+    }
+    if (selectedNodes.length > 0) {
       targetNode = selectedNodes[0]
-      //console.log(targetNode)
-      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190,10,10, 0.6)'
-      timeout = setTimeout(function () {
-        targetNode.cell.style.boxShadow = 'none'
-        clearTimeout(timeout)
-      }, 3000)
-      return targetNode
     } else {
       targetNode = level.nodes[level.player.index]
-      targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 10, 10, 0.6)'
-      timeout = setTimeout(function () {
-        targetNode.cell.style.boxShadow = 'none'
-        clearTimeout(timeout)
-      }, 3000)
-      return targetNode
     }
-
+    targetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(190, 10, 10, 0.6)'
+    const timeout = setTimeout(function () {
+      targetNode.cell.style.boxShadow = 'none'
+      clearTimeout(timeout)
+    }, 3000)
+    return targetNode
   }
+
 
   // * Blue ghost logic
 
@@ -452,9 +462,11 @@ function init() {
         opponentTargetNode = adjacentNodes[Math.floor(Math.random() * (adjacentNodes.length))]
         randomPath.push(opponentCurrentNode)
         randomPath.shift()
-        removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode, index)
-        changeOpponentPosition(level, opponentTargetNode, index)
-        opponentTargetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px lightblue'
+        if (Boolean(opponentTargetNode) === true) {
+          removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode, index)
+          changeOpponentPosition(level, opponentTargetNode, index)
+          opponentTargetNode.cell.style.boxShadow = 'inset 0px 0px 4px 2px lightblue'
+        }
       } else {
         clearInterval(randomMoveInterval)
       }
@@ -537,7 +549,7 @@ function init() {
     if (adjacentNodes.some(node => (node.cell.classList.contains('green-opponent') || node.cell.classList.contains('blue-opponent') || node.cell.classList.contains('red-opponent')))) {
       if (!shockMode) {
         gameOver = true
-        playerLost()
+        playerLost(level)
       }
       if (shockMode) {
         if (adjacentNodes.some(node => (node.cell.classList.contains('red-opponent')))) {
@@ -681,35 +693,38 @@ function init() {
 
   function scorePoints(level) {
     if (level.nodes[level.player.index].cell.classList.contains('food')) {
-      score.innerText = Number(score.innerText) + 100
+      level.score += 100
       foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
-      score.innerText = Number(score.innerText) + 1000
+      level.score += 1000
       foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (ghostKilled) {
-      score.innerText = Number(score.innerText) + 2000
+      level.score += 2000
       ghostKilled = false
     }
+    score.innerText = `${level.score}`
     if (Number(foodCount.innerText) === 0) {
       nextLevel(level)
     }
   }
   //! TIMERS
 
-  function setTimers() {
-    let countSeconds
-    let timeForGame
-    countSeconds = setInterval(function () {
-      if (Number(remainingTime.innerText) === 1) {
+  
+
+  function setTimers(level) {
+    const countSeconds = setInterval(function () {
+      if (level.time === 1) {
         gameOver = true
       }
-      if (Number(remainingTime.innerText) === 1 || restart === true || gameOver === true) {
+      if (level.time === 1 || restart === true || gameOver === true || restart === true) {
         clearInterval(countSeconds)
         clearTimeout(timeForGame)
       }
-      remainingTime.innerText = Number(remainingTime.innerText) - 1
+      level.time--
+      remainingTime.innerText = `${level.time}`
     }, 1000)
-    timeForGame = setTimeout(function () {
+    const timeForGame = setTimeout(function () {
+      gameOver === true
       clearInterval(countSeconds)
       clearTimeout(timeForGame)
     }, 300000)
@@ -727,29 +742,54 @@ function init() {
     moveRandomly(level, 2)
   }
   function game(level) {
-    restart = false
     buildBoard(level)
+    restart = false
     startButton.addEventListener('click', function () {
       normalMode(level)
-      setTimers()
+      setTimers(level)
     }, { once: true })
   }
 
   function nextLevel(level) {
-    const nextLevel = level.number + 1
-    game(nextLevel)
+    currentLevel ++
+    popUpScreen.innerHTML = `<h2>Congratulations!</br>Level <span class='numbers'>${level.number}</span>completed!</h2>`
+    popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
+    popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
+    continueButton.innerText = 'Next level 0 0 0'
+    continueButton.addEventListener('click', function () {
+      restartLevel()
+      while (popUpScreen.lastChild) {
+        popUpScreen.removeChild(popUpScreen.lastChild)
+      }
+      grid.removeChild(popUpScreen)
+    }, { once: true })
+    grid.appendChild(popUpScreen)
+    popUpScreen.appendChild(continueButton)
   }
 
-  function playerLost() { // pop up message here
-    restartButton.addEventListener('click', function() {
+  function playerLost(level) { // pop up message here
+    popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
+    popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
+    popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
+    continueButton.innerText = 'Try again 0 0 0'
+    continueButton.addEventListener('click', function () {
+      while (popUpScreen.lastChild) {
+        popUpScreen.removeChild(popUpScreen.lastChild)
+      }
       restartLevel()
-    } , { once: true })
+    }, { once: true })
+    grid.appendChild(popUpScreen)
+    popUpScreen.appendChild(continueButton)
   }
 
   function restartLevel() {
-    remainingTime.innerText = '300'
-    foodCount.innerText = '0'
-    score.innerText = '0'
+    if (document.body.lastChild === continueButton) {
+      content.style.display = 'flex'
+      document.body.removeChild(continueButton)
+    }
+    restartButton.addEventListener('click', function () {
+      restartLevel()
+    }, { once: true })
     while (grid.firstChild) {
       grid.removeChild(grid.firstChild)
     }
@@ -757,21 +797,33 @@ function init() {
     let p
     if (currentLevel === 1) {
       p = lvPar1
-    }// else if (level.number === 2) {
-      //   p = lvPar2
-      // } else if (level.number === 3) {
-        //   p = lvPar3
-        // }
-    const level = new Level(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7])
+    } else if (currentLevel === 2) {
+      p = lvPar2
+    } //else if (level.number === 3) {
+    //   p = lvPar3
+    // }
+    const newLevel = new Level(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
+    newLevel.score = 0
+    score.innerText = `${newLevel.score}`
+    remainingTime.innerText = `${newLevel.time}`
+    foodCount.innerText = '0'
     gameOver = false
-    game(level)
+    game(newLevel)
   }
 
+  function startScreen() {
+    content.style.display = 'none'
+    continueButton.classList.add('button')
+    continueButton.innerText = 'Press to continue..'
+    continueButton.addEventListener('click', function() {
+      restartLevel()
+    }, { once: true })
+    document.body.append(continueButton)
+  }
 
   // ! INVOKING FUNCTIONS
 
-
-  restartLevel()
+  startScreen()
 
 
 }
