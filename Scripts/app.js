@@ -64,6 +64,7 @@ function init() {
   const popUpScreen = document.createElement('div')
   popUpScreen.classList.add('pop-up')
   let gameOver = false
+  let levelCompleted = false
   let movementDirection = 'right'
   let currentLevel = 1
 
@@ -120,7 +121,15 @@ function init() {
   }
   // ! DEFINING LEVELS
 
-  const solidLvl1 = [
+  const solidLvl1 = [32, 33, 34, 35, 36, 38, 39, 40, 41, 42,
+    62, 64, 65, 66, 67, 68, 69, 70, 72,
+    92, 93, 94, 95, 97, 99, 100, 101, 102,
+    112, 
+    122, 123, 124, 125, 127, 129, 130, 131, 132, 
+    152, 154, 155, 156, 157, 158, 159, 160, 162,
+    182, 183, 184, 185, 186, 188, 189, 190, 191, 192]
+
+  const solidLvl2 = [
     24, 28, 31, 35,
     42, 46, 47, 48, 51, 52, 53, 57,
     62, 63, 64, 67, 68, 71, 72, 75, 76, 77,
@@ -140,8 +149,10 @@ function init() {
     342, 343, 344, 345, 346, 348, 349, 350, 351, 353, 354, 355, 356, 357
   ]
 
-  const lvPar1 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1, 300]
-  const lvPar2 = [1, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl1, 300]
+ 
+
+  const lvPar1 = [1, 15, 15, 'Cat', 16, [22, 106, 111, 113, 118, 202], [126, 128, 98], solidLvl1, 300]
+  const lvPar2 = [2, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl2, 300]
 
   // ! BUILDING BOARD
 
@@ -153,7 +164,7 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      // newNode.cell.innerText = `[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
+      newNode.cell.innerText = `${newNode.index}` //`[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Adding magic food
@@ -275,17 +286,17 @@ function init() {
     const key = event.keyCode
     clearInterval(playerInterval)
     playerInterval = setInterval(function () {
-      if (!gameOver) {
-        if (key === 39) {
+      if (!gameOver && !levelCompleted) {
+        if (key === 39 || key === 68) {
           movementDirection = 'right'
           moveRight(this)
-        } else if (key === 37) {
+        } else if (key === 37 || key === 65) {
           movementDirection = 'left'
           moveLeft(this)
-        } else if (key === 38) {
+        } else if (key === 38 || key === 87) {
           movementDirection = 'up'
           moveUp(this)
-        } else if (key === 40) {
+        } else if (key === 40 || key === 83) {
           movementDirection = 'down'
           moveDown(this)
         }
@@ -296,6 +307,7 @@ function init() {
   // ! OPPONENT CONTROL MECHANICS
 
   function changeOpponentPosition(level, targetNode, index) {
+    ghostFoundPlayer(level)
     if (targetNode === undefined) {
       return
     }
@@ -320,6 +332,7 @@ function init() {
   }
 
   function removeOpponentPosition(level, targetNode, currentNode, index) {
+    ghostFoundPlayer(level)
     if (targetNode === undefined) {
       return
     }
@@ -340,8 +353,8 @@ function init() {
   function chasePlayer(level, index) {
     clearInterval(targetPlayerInterval)
     targetPlayerInterval = setInterval(function () {
-      ghostFoundPlayer(level)
-      if (!gameOver) {
+      //ghostFoundPlayer(level)
+      if (!gameOver && !levelCompleted) {
         const opponentCurrentNode = level.opponents[index]
         const path = findPath(level, opponentCurrentNode, level.nodes[level.player.index])
         const opponentTargetNode = path[0]
@@ -359,7 +372,7 @@ function init() {
     clearInterval(targetFourInterval)
     targetFourInterval = setInterval(function () {
       const opponentCurrentNode = level.opponents[index]
-      if (!gameOver) {
+      if (!gameOver && !levelCompleted) {
         let opponentTargetNode = findTargetFourAhead(level)
         if (opponentTargetNode === undefined) {
           clearInterval(targetFourInterval)
@@ -454,7 +467,7 @@ function init() {
       const opponentPreviousNode = randomPath[randomPath.length - 1]
       let opponentTargetNode
       //randomPath.push(opponentCurrentNode)
-      if (!gameOver) {
+      if (!gameOver && !levelCompleted) {
         let adjacentNodes = findAdjacent(level, opponentCurrentNode)
         adjacentNodes.splice(adjacentNodes.indexOf(opponentPreviousNode), 1)
         adjacentNodes = adjacentNodes.filter(node => !(node.cell.classList.contains('solid')))
@@ -496,10 +509,9 @@ function init() {
 
   function targetCorner(level, index, interval) {
     let cornerIndex
-    let shockModeTimeout = undefined
     let timeout
     // ghostFoundPlayer(level) //! Player found ghost?
-    if (!gameOver) { // Need something to switch this
+    if (!gameOver && !levelCompleted) { // Need something to switch this
       const opponentCurrentNode = level.opponents[index]
       if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
         cornerIndex = level.nodes.length - (level.width + 2)
@@ -527,7 +539,7 @@ function init() {
         }
       }, 500)
     }
-    shockModeTimeout = setTimeout(function () {
+    const shockModeTimeout = setTimeout(function () {
       clearInterval(interval)
       shockMode = false
       normalMode(level)
@@ -703,36 +715,38 @@ function init() {
     }
     score.innerText = `${level.score}`
     if (Number(foodCount.innerText) === 0) {
+      currentLevel ++
       nextLevel(level)
     }
   }
   //! TIMERS
 
-  let countSeconds
-  let timeForGame
-
   function setTimers(level) {
-    countSeconds = setInterval(function () {
-      if (level.time === 1) {
-        gameOver = true
+
+    const countSeconds = setInterval(function () {
+      if (level.time === 1 || gameOver === true) {
+        //gameOver = true
+        playerLost(level)
       }
-      if (level.time === 1 || restart === true || gameOver === true) {
+      if  (levelCompleted === true || gameOver === true) {
         clearInterval(countSeconds)
         clearTimeout(timeForGame)
       }
       level.time--
       remainingTime.innerText = `${level.time}`
     }, 1000)
-    timeForGame = setTimeout(function () {
+    const timeForGame = setTimeout(function () {
       gameOver = true
+    }, 299000)
+
+    restartButton.addEventListener('click', function () {
       clearInterval(countSeconds)
       clearTimeout(timeForGame)
-    }, 299000)
+      score.innerText = ''
+      restartLevel()
+    }, { once: true })
   }
   // ! MAIN FUNCTIONS
-
-  let restart = false
-
 
   function normalMode(level) {
     document.addEventListener('keyup', handleKeyUp.bind(level))
@@ -742,47 +756,42 @@ function init() {
     moveRandomly(level, 2)
   }
 
-  function game(level) {
-    gameOver = false
-    restart = false
-    buildBoard(level)
-    startButton.addEventListener('click', function () {
-      restartButton.addEventListener('click', function () {
-        clearInterval(countSeconds)
-        clearTimeout(timeForGame)
-        score.innerText = ''
-        restartLevel()
-      }, { once: true })
-      normalMode(level)
-      setTimers(level)
-    }, { once: true })
-  }
-
+  
   function nextLevel(level) {
-    currentLevel ++
-    restart = true
+    levelCompleted = true
     popUpScreen.innerHTML = `<h2>Congratulations!</br>Level <span class='numbers'>${level.number}</span>completed!</h2>`
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
     continueButton.innerText = 'Next level 0 0 0'
     continueButton.addEventListener('click', function () { 
       restartLevel()
-      while (popUpScreen.lastChild) {
-        popUpScreen.removeChild(popUpScreen.lastChild)
-      }
-      grid.removeChild(popUpScreen)
     }, { once: true })
     grid.appendChild(popUpScreen)
     popUpScreen.appendChild(continueButton)
   }
-
+  
   function playerLost(level) { // pop up message here
-    restart = true
-
-    popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
+    if (level.time <= 1) {
+      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>time ran out</h2>`
+    } else {
+      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
+    }
+    continueButton.innerText = 'Try Again 0 0 0'
+    grid.appendChild(popUpScreen)
+    popUpScreen.appendChild(continueButton)
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
     grid.appendChild(popUpScreen)
+    continueButton.addEventListener('click', function () { 
+      restartLevel()
+    }, { once: true })
+  }
+
+  function game(level) {
+    levelCompleted = false
+    gameOver = false
+    normalMode(level)
+    setTimers(level)
   }
 
   function restartLevel() {  
@@ -796,7 +805,8 @@ function init() {
     let p
     if (currentLevel === 1) {
       p = lvPar1
-    } else if (currentLevel === 2) {
+    }
+    if (currentLevel === 2) {
       p = lvPar2
     } //else if (level.number === 3) {
     //   p = lvPar3
@@ -806,7 +816,10 @@ function init() {
     score.innerText = `${newLevel.score}`
     remainingTime.innerText = `${newLevel.time}`
     foodCount.innerText = '0'
-    game(newLevel)
+    buildBoard(newLevel)
+    startButton.addEventListener('click', function () {
+      game(newLevel)
+    }, { once: true })
   }
 
   function startScreen() {

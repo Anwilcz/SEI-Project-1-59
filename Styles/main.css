@@ -24,10 +24,6 @@ body {
   align-items: center;
 }
 
-main {
-  /* background-color: white; */
-}
-
 .pop-up {
   position: absolute;
   display: flex;
@@ -133,6 +129,7 @@ button {
 button:hover {
   background-color: rgb(155, 155, 155);
   -webkit-text-stroke-color: rgb(0, 0, 0);
+  box-shadow: inset 1px 1px 10px rgba(0, 0, 0, 0.8);
   color: rgb(243,98,127);
 }
 
