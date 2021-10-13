@@ -115,7 +115,6 @@ function init() {
       })
       this.magicPosition = magicPosition
       this.collisions = collisions
-      this.score = score
       this.time = time
     }
   }
@@ -709,25 +708,26 @@ function init() {
   }
   //! TIMERS
 
-  
+  let countSeconds
+  let timeForGame
 
   function setTimers(level) {
-    const countSeconds = setInterval(function () {
+    countSeconds = setInterval(function () {
       if (level.time === 1) {
         gameOver = true
       }
-      if (level.time === 1 || restart === true || gameOver === true || restart === true) {
+      if (level.time === 1 || restart === true || gameOver === true) {
         clearInterval(countSeconds)
         clearTimeout(timeForGame)
       }
       level.time--
       remainingTime.innerText = `${level.time}`
     }, 1000)
-    const timeForGame = setTimeout(function () {
-      gameOver === true
+    timeForGame = setTimeout(function () {
+      gameOver = true
       clearInterval(countSeconds)
       clearTimeout(timeForGame)
-    }, 300000)
+    }, 299000)
   }
   // ! MAIN FUNCTIONS
 
@@ -741,10 +741,18 @@ function init() {
     targetFourAhead(level, 1)
     moveRandomly(level, 2)
   }
+
   function game(level) {
-    buildBoard(level)
+    gameOver = false
     restart = false
+    buildBoard(level)
     startButton.addEventListener('click', function () {
+      restartButton.addEventListener('click', function () {
+        clearInterval(countSeconds)
+        clearTimeout(timeForGame)
+        score.innerText = ''
+        restartLevel()
+      }, { once: true })
       normalMode(level)
       setTimers(level)
     }, { once: true })
@@ -752,11 +760,12 @@ function init() {
 
   function nextLevel(level) {
     currentLevel ++
+    restart = true
     popUpScreen.innerHTML = `<h2>Congratulations!</br>Level <span class='numbers'>${level.number}</span>completed!</h2>`
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
     continueButton.innerText = 'Next level 0 0 0'
-    continueButton.addEventListener('click', function () {
+    continueButton.addEventListener('click', function () { 
       restartLevel()
       while (popUpScreen.lastChild) {
         popUpScreen.removeChild(popUpScreen.lastChild)
@@ -768,32 +777,22 @@ function init() {
   }
 
   function playerLost(level) { // pop up message here
+    restart = true
+
     popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
-    continueButton.innerText = 'Try again 0 0 0'
-    continueButton.addEventListener('click', function () {
-      while (popUpScreen.lastChild) {
-        popUpScreen.removeChild(popUpScreen.lastChild)
-      }
-      restartLevel()
-    }, { once: true })
     grid.appendChild(popUpScreen)
-    popUpScreen.appendChild(continueButton)
   }
 
-  function restartLevel() {
+  function restartLevel() {  
     if (document.body.lastChild === continueButton) {
       content.style.display = 'flex'
       document.body.removeChild(continueButton)
     }
-    restartButton.addEventListener('click', function () {
-      restartLevel()
-    }, { once: true })
     while (grid.firstChild) {
       grid.removeChild(grid.firstChild)
     }
-    restart = true
     let p
     if (currentLevel === 1) {
       p = lvPar1
@@ -807,7 +806,6 @@ function init() {
     score.innerText = `${newLevel.score}`
     remainingTime.innerText = `${newLevel.time}`
     foodCount.innerText = '0'
-    gameOver = false
     game(newLevel)
   }
 
