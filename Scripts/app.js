@@ -1,53 +1,3 @@
-// ! --------------- GAME CHOICE 1: PAC-MAN --------------- ! //
-
-// * 1. STRUCTURE:
-// Interface:
-// - Add a button that will start a game on click
-// - Add a button that restarts the game
-// - Display remaining time and current score & remaining coins
-
-// Create board:
-// - Create grid using flexbox and javascript (n squares appended to main section)
-// - Design structure of solid boxes (class with different styling that would be used to determine collisions)
-// - Create tunel squares and class and set it on the board
-// - Create coin class and add it to every non-solid square on the board (except pac-man starting point)
-// - Create a magic fruit class and set it on the boardz
-
-// * 2. PLAYER INSTANCE AND OPPONENTS
-// Pac-man:
-// - Create pac-man instance of a player class that will contain functions responsible for movements (could be invoked directly on the object e.g. pacman.move())
-// - Designate a starting point and set pac-man on the chosen square
-// Ghosts:
-// - Create ghost instance of an opponent class that will contain functions responsible for ghost actions (could be invoked directly on the object e.g. ghost.move())
-// - Designate ghosts starting positions and set ghosts on chosen squares
-
-// * 3. GAME MECHANICS
-// Game start:
-// - Add event listeners to the buttons
-// - Start the timer when game begins && invoke main function
-
-// Ghosts:
-// - Write a function that randomizes ghost moves
-// - Ghosts move 1 node per second, invoke findPath function after each move to find the shortest path to the player //! (A*)
-// - Check if pac-man moves in the same collumn/row as a ghost (between solid blocks), if so -> chasing begins //! TBC LATER
-// - Ghost will follow pac-man for the next 15 squares moves //! TBC LATER
-// - If ghost hits pac-man game is over
-
-// Pac-man:
-// - Write pac-man functions -> move-top;right;down;left() - pacman moves forward unless the user changes direction by pressing arrow or there is a collision on the way
-// - Every time pac-man moves check if the current square contains a coin class or a magic fruit class, if so -> score points & remove existing class
-// - If pac-man eats magic fruit ghosts become vulnerable (could change appearance -> start flashing) and run away, ghost speed is decresed & timer starts //! (A*) REVERSE
-//   => 
-// - If pac-man hits a ghost -> ghost goes back to its holding pen & score points, when timer is down the rules go back to normal. 
-
-// Display Results
-// - If board is clear of coins -> pac-man wins, display result and score, move to another platform
-// - If ghost hits pac-man or time runs out-> game is over, display result and score, ask user if they want to play again
-
-// * 4. ANIMATIONS
-// - When pac-man moves, finds a coin or hits/ eats a ghost
-// - When ghosts move and hit pac-man
-
 function init() {
 
   // ! GLOBAL VARIABLES
@@ -133,29 +83,51 @@ function init() {
     182, 183, 184, 185, 186, 188, 189, 190, 191, 192]
 
   const solidLvl2 = [
-    24, 28, 31, 35,
-    42, 46, 47, 48, 51, 52, 53, 57,
-    62, 63, 64, 67, 68, 71, 72, 75, 76, 77,
-    84, 87, 88, 91, 92, 95,
-    101, 102, 104, 105, 114, 115, 117, 118,
-    127, 132,
-    142, 143, 144, 147, 148, 149, 150, 151, 152, 155, 156, 157,
-    162, 163, 164, 175, 176, 177,
-    182, 183, 184, 185, 186, 187, 188, 191, 192, 193, 194, 195, 196, 197,
-    205, 206, 207, 212, 213, 214,
-    221, 222, 226, 227, 229, 230, 232, 233, 237, 238,
-    241, 242, 243, 244, 249, 250, 255, 256, 257, 258,
-    261, 266, 268, 269, 270, 271, 273, 278,
-    285, 286, 288, 289, 290, 291, 293, 294,
-    302, 303, 304, 305, 308, 309, 310, 311, 314, 315, 316, 317,
-    322, 323, 324, 335, 336, 337,
-    342, 343, 344, 345, 346, 348, 349, 350, 351, 353, 354, 355, 356, 357
+    44, 45, 46, 48, 49, 50, 52, 54, 55, 56, 58, 59, 60,
+    67, 73, 79,
+    85, 86, 88, 90, 92, 93, 94, 95, 96, 98, 100, 102, 103,
+    111, 119,
+    128, 129, 130, 131, 132, 133, 135, 136, 137, 139, 140, 141, 142, 143, 144,
+    169, 170, 172, 174, 175, 176, 177, 178, 179, 180, 181, 182, 184, 186, 187,
+    193, 195, 203, 205,
+    212, 213, 214, 218, 219, 220, 221, 222, 226, 227, 228,
+    235, 237, 245, 247,
+    253, 254, 256, 258, 259, 260, 261, 262, 263, 264, 265, 266, 268, 270, 271,
+    296, 297, 298, 299, 300, 301, 303, 304, 305, 307, 308, 309, 310, 311, 312,
+    321, 329,
+    337, 338, 340, 342, 344, 345, 346, 347, 348, 350, 352, 354, 355,
+    361, 367, 373, 
+    380, 381, 382, 384, 385, 386, 388, 390, 391, 392, 394, 395, 396
+  ]
+
+  const solidLvl3 = [
+    24, 25, 31, 32,
+    40, 41, 43, 44, 46, 47, 48, 50, 51, 53, 54,
+    60, 72,
+    77, 79, 81, 82, 83, 85, 87, 88, 89, 91, 93,
+    100, 104, 108,
+    116, 117, 119, 121, 123, 125, 127, 129, 130,
+    135, 142, 149,
+    154, 156, 157, 159, 160, 161, 162, 163, 165, 166, 168,
+    176, 184,
+    192, 193, 195, 197, 201, 203, 205, 206,
+    211, 225,
+    230, 232, 233, 235, 236, 237, 238, 239, 241, 242, 244,
+    251, 261,
+    267, 268, 270, 272, 273, 275, 277, 278, 280, 282, 283,
+    289, 291, 292, 294, 296, 297, 299,
+    306, 313, 320,
+    325, 326, 327, 328, 330, 332, 334, 336, 337, 338, 339,
+    349, 353
   ]
 
 
 
+
+
   const lvPar1 = [1, 15, 15, 'Cat', 16, [22, 106, 111, 113, 118, 202], [126, 128, 98], solidLvl1, 300]
-  const lvPar2 = [2, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl2, 300]
+  const lvPar2 = [2, 19, 20, 'Cat', 28, [66, 173, 187, 256], [198, 199, 200], solidLvl2, 300]
+  const lvPar3 = [3, 21, 21, 'Cat', 22, [241, 211, 229, 31, 409], [217, 199, 223], solidLvl3, 300]
 
   // ! BUILDING BOARD
 
@@ -167,7 +139,7 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      newNode.cell.innerText = `${newNode.index}` //`[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
+      newNode.cell.innerText = `${newNode.index},` //`[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Adding magic food
@@ -828,9 +800,14 @@ function init() {
     }
     if (currentLevel === 2) {
       p = lvPar2
-    } //else if (level.number === 3) {
-    //   p = lvPar3
-    // }
+    }
+    if (currentLevel === 3) {
+      p = lvPar3
+    }
+    if (currentLevel === 4) {
+      endGameScreen()
+      return
+    }
     const newLevel = new Level(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
     newLevel.score = 0
     score.innerText = `${newLevel.score}`
