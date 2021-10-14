@@ -256,9 +256,18 @@ button:hover, .button-continue:hover {
 /* Footer */
 
 footer {
+  min-width: 350px;
+  display: flex;
+  justify-content: center;
   padding-top: 10px;
   text-align: center;
   width: 100vw;
+}
+
+footer > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Game objects */
@@ -321,4 +330,63 @@ footer {
   background-position: center;
   background-size: 28px;
   background-repeat: no-repeat;
+}
+
+/* Sounds */
+
+
+.switch {
+	background-color: rgba(0, 0, 0, 0);
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  background-color: rgb(155, 155, 155);
+  border-radius: 7px;
+  box-shadow: inset 1px 1px 10px rgba(0, 0, 0, 0.8);
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  transform: translate(12px, 1px);
+  position: absolute;
+  height: 7px;
+  width: 13px;
+  left: 1px;
+  bottom: 1px;
+  background-color: rgb(243,98,127);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  font-size: 10px;
+  text-align: center;
+  content: '';
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+input:checked + .slider:before {
+  transform: translate(-1px, 1px);
+  border-radius: 0;
+  content: '';
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }

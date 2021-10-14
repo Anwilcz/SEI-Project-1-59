@@ -55,15 +55,8 @@ function init() {
   const startButton = document.querySelector('#start-button')
   const restartButton = document.querySelector('#restart-button')
   const continueButton = document.createElement('button')
-  startButton.addEventListener('mouseenter', function () {
-    playAudio('audio-click')
-  })
-  restartButton.addEventListener('mouseenter', function () {
-    playAudio('audio-click')
-  })
-  continueButton.addEventListener('mouseenter', function () {
-    playAudio('audio-click')
-  })
+  const audioElements = document.querySelectorAll('audio')
+  const switchAudio = document.querySelector('.switch-audio')
   const grid = document.querySelector('.grid')
   const score = document.querySelector('#current-score')
   const foodCount = document.querySelector('#remaining-food')
@@ -862,18 +855,42 @@ function init() {
     }, { once: true })
     document.body.append(continueButton)
   }
+  // ! AUDIO
+
+  startButton.addEventListener('mouseenter', function () {
+    playAudio('audio-click')
+  })
+  restartButton.addEventListener('mouseenter', function () {
+    playAudio('audio-click')
+  })
+  continueButton.addEventListener('mouseenter', function () {
+    playAudio('audio-click')
+  })
+  switchAudio.addEventListener('change', muteAudio)
 
   function playAudio(id) {
     const audio = document.getElementById(id)
     const promise = audio.play()
     if (promise !== undefined) {
-      promise.then( value => {
+      promise.then(value => {
         value
       }).catch(() => {
         return
       })
     }
   }
+
+  function muteAudio() {
+    console.log(audioElements)
+    audioElements.forEach(audio => {
+      if (audio.muted) {
+        audio.muted = false
+      } else {
+        audio.muted = true
+      }
+    })
+  }
+
 
   // ! INVOKING FUNCTIONS
 
