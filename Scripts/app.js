@@ -55,6 +55,15 @@ function init() {
   const startButton = document.querySelector('#start-button')
   const restartButton = document.querySelector('#restart-button')
   const continueButton = document.createElement('button')
+  startButton.addEventListener('mouseenter', function() {
+    playAudio('audio-click')
+  })
+  restartButton.addEventListener('mouseenter', function() {
+    playAudio('audio-click')
+  })
+  continueButton.addEventListener('mouseenter', function() {
+    playAudio('audio-click')
+  })
   const grid = document.querySelector('.grid')
   const score = document.querySelector('#current-score')
   const foodCount = document.querySelector('#remaining-food')
@@ -218,6 +227,9 @@ function init() {
       // May need to add boolean value to control player vulnerability to ghosts
       // player kills ghosts when mode is on
       // They come back to their original positions and then leave after some time
+    }
+    if (!(level.nodes[level.player.index].cell.classList.contains('food')) || !(level.nodes[level.player.index].cell.classList.contains('food')) ) {
+      playAudio('audio-step')
     }
     level.nodes[level.player.index].cell.classList.remove('food')
     level.nodes[level.player.index].cell.classList.remove('magic-food')
@@ -488,6 +500,7 @@ function init() {
   // ! SHOCK MODE FUNCTIONS
   let shockMode = false
   function switchMode(level) {
+    playAudio('audio-mode')
     shockMode = true
     // breaks normal move movements
     runAway(level)
@@ -539,6 +552,10 @@ function init() {
         }
       }, 500)
     }
+    const countDown = setTimeout(function() {
+      playAudio('audio-countdown')
+      clearTimeout(countDown)
+    }, 13000)
     const shockModeTimeout = setTimeout(function () {
       clearInterval(interval)
       shockMode = false
@@ -578,6 +595,24 @@ function init() {
         }
       }
     }
+  }
+
+  function playerLost(level) { // pop up message here
+    playAudio('audio-lose')
+    if (level.time <= 1) {
+      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>time ran out</h2>`
+    } else {
+      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
+    }
+    continueButton.innerText = 'Try Again 0 0 0'
+    grid.appendChild(popUpScreen)
+    popUpScreen.appendChild(continueButton)
+    popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
+    popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
+    grid.appendChild(popUpScreen)
+    continueButton.addEventListener('click', function () { 
+      restartLevel()
+    }, { once: true })
   }
 
   // ! PATH FINDING ALGORITHM (A*)
@@ -704,12 +739,17 @@ function init() {
 
   function scorePoints(level) {
     if (level.nodes[level.player.index].cell.classList.contains('food')) {
+      playAudio('audio-chewing')
       level.score += 100
       foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
+      playAudio('audio-chewing')
+      playAudio('audio-mode')
       level.score += 1000
       foodCount.innerText = Number(foodCount.innerText) - 1
     } else if (ghostKilled) {
+      playAudio('audio-chewing')
+      playAudio('audio-mode')
       level.score += 2000
       ghostKilled = false
     }
@@ -738,7 +778,6 @@ function init() {
     const timeForGame = setTimeout(function () {
       gameOver = true
     }, 299000)
-
     restartButton.addEventListener('click', function () {
       clearInterval(countSeconds)
       clearTimeout(timeForGame)
@@ -758,6 +797,7 @@ function init() {
 
   
   function nextLevel(level) {
+    playAudio('audio-win')
     levelCompleted = true
     popUpScreen.innerHTML = `<h2>Congratulations!</br>Level <span class='numbers'>${level.number}</span>completed!</h2>`
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
@@ -770,23 +810,6 @@ function init() {
     popUpScreen.appendChild(continueButton)
   }
   
-  function playerLost(level) { // pop up message here
-    if (level.time <= 1) {
-      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>time ran out</h2>`
-    } else {
-      popUpScreen.innerHTML = `<h2>Game Over!</br>Level <span class='numbers'>${level.number}</span>ghosts caught the cat</h2>`
-    }
-    continueButton.innerText = 'Try Again 0 0 0'
-    grid.appendChild(popUpScreen)
-    popUpScreen.appendChild(continueButton)
-    popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
-    popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
-    grid.appendChild(popUpScreen)
-    continueButton.addEventListener('click', function () { 
-      restartLevel()
-    }, { once: true })
-  }
-
   function game(level) {
     levelCompleted = false
     gameOver = false
@@ -824,12 +847,20 @@ function init() {
 
   function startScreen() {
     content.style.display = 'none'
-    continueButton.classList.add('button')
+    continueButton.classList.add('button-continue')
     continueButton.innerText = 'Press to continue..'
+    restartButton.addEventListener('mouseenter', function() {
+      playAudio('audio-click')
+    }, { once: true })
     continueButton.addEventListener('click', function() {
       restartLevel()
     }, { once: true })
     document.body.append(continueButton)
+  }
+
+  function playAudio(id) {
+    const audio = document.getElementById(id)
+    audio.play()
   }
 
   // ! INVOKING FUNCTIONS

@@ -46,6 +46,7 @@ h2 {
   text-align: center;
   line-height: 35px;
   margin-bottom: 30px;
+  animation: bounce-in 3s;
 }
 
 .numbers {
@@ -78,6 +79,27 @@ header > h1 {
   box-shadow: inset 0px 0px 10px 10px rgb(240,240,240);
   border-radius: 20px;
   padding: 10px;
+  animation: bounce-in 3s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  75% {
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
 }
 
 p {
@@ -112,7 +134,7 @@ p {
   display: flex;
 }
 
-button {
+button, .button-continue {
   background-color: white;
   color: lightblue;
   -webkit-text-stroke-color: rgb(0, 0, 0);
@@ -126,12 +148,30 @@ button {
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-button:hover {
+.button-continue {
+  animation: fade-in 3s;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+button:hover, .button-continue:hover {
   background-color: rgb(155, 155, 155);
   -webkit-text-stroke-color: rgb(0, 0, 0);
   box-shadow: inset 1px 1px 10px rgba(0, 0, 0, 0.8);
   color: rgb(243,98,127);
+  transform: translate(2px, 2px);
 }
+
 
 .score{
   width: 165px;
@@ -226,11 +266,27 @@ footer {
 .player {
   
   background-image: url('../Assets/cat.gif'), radial-gradient(circle at 50%, rgba(0, 0, 0, 0.6),rgba(0,0,0,0.5), rgba(0,0,0,0.0), rgba(0,0,0,0.0));
-  background-position: center;
+  /* background-position: center; */
   background-size: 28px;
   background-repeat: no-repeat;
   box-shadow: none !important;
 }
+
+/* .slide-left {
+  animation: slide-left-animation 1s;
+}
+
+@keyframes slide-left-animation {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+} */
+
+
 
 .red-opponent {
   background-image: url('../Assets/red-ghost.gif') !important;
@@ -253,7 +309,7 @@ footer {
 }
 
 .food {
-  background-image: url('../Assets/food-2.gif'), radial-gradient(circle at 50%, rgba(0, 0, 0, 0.6),rgba(0,0,0,0.4), rgba(0,0,0,0.0), rgba(0,0,0,0.0),rgba(0,0,0,0.0));
+  background-image: url('../Assets/food.gif'), radial-gradient(circle at 50%, rgba(0, 0, 0, 0.6),rgba(0,0,0,0.4), rgba(0,0,0,0.0), rgba(0,0,0,0.0),rgba(0,0,0,0.0));
   background-position: center;
   background-size: 15px;
   
