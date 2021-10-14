@@ -72,6 +72,7 @@ function init() {
   const content = document.querySelector('.content')
   const popUpScreen = document.createElement('div')
   popUpScreen.classList.add('pop-up')
+  let alarm = false
   let gameOver = false
   let levelCompleted = false
   let movementDirection = 'right'
@@ -223,6 +224,7 @@ function init() {
     if (level.nodes[level.player.index].cell.classList.contains('magic-food')) {
       if (!shockMode) {
         switchMode(level)
+        alarm = true
       } // Need to add shock mode to chasePlayer, moveRandomly and taargetFourAhead
       // May need to add boolean value to control player vulnerability to ghosts
       // player kills ghosts when mode is on
@@ -340,6 +342,9 @@ function init() {
       level.opponents[index].index = targetNode.index
       level.opponents[index].x = targetNode.x
       level.opponents[index].y = targetNode.y
+    }
+    if (alarm === true) {
+      playAudio('audio-spell')
     }
   }
 
@@ -561,8 +566,8 @@ function init() {
       shockMode = false
       normalMode(level)
       clearTimeout(shockModeTimeout)
+      alarm = false
     }, 15000)
-
   }
 
 
