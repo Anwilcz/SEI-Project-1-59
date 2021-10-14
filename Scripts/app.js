@@ -762,8 +762,7 @@ function init() {
   function setTimers(level) {
 
     const countSeconds = setInterval(function () {
-      if (level.time === 1 || gameOver === true) {
-        //gameOver = true
+      if (level.time === 1) {
         playerLost(level)
       }
       if (levelCompleted === true || gameOver === true) {
@@ -881,7 +880,6 @@ function init() {
   }
 
   function muteAudio() {
-    console.log(audioElements)
     audioElements.forEach(audio => {
       if (audio.muted) {
         audio.muted = false
