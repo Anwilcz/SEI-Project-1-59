@@ -55,13 +55,13 @@ function init() {
   const startButton = document.querySelector('#start-button')
   const restartButton = document.querySelector('#restart-button')
   const continueButton = document.createElement('button')
-  startButton.addEventListener('mouseenter', function() {
+  startButton.addEventListener('mouseenter', function () {
     playAudio('audio-click')
   })
-  restartButton.addEventListener('mouseenter', function() {
+  restartButton.addEventListener('mouseenter', function () {
     playAudio('audio-click')
   })
-  continueButton.addEventListener('mouseenter', function() {
+  continueButton.addEventListener('mouseenter', function () {
     playAudio('audio-click')
   })
   const grid = document.querySelector('.grid')
@@ -134,8 +134,8 @@ function init() {
   const solidLvl1 = [32, 33, 34, 35, 36, 38, 39, 40, 41, 42,
     62, 64, 65, 66, 67, 68, 69, 70, 72,
     92, 93, 94, 95, 97, 99, 100, 101, 102,
-    112, 
-    122, 123, 124, 125, 127, 129, 130, 131, 132, 
+    112,
+    122, 123, 124, 125, 127, 129, 130, 131, 132,
     152, 154, 155, 156, 157, 158, 159, 160, 162,
     182, 183, 184, 185, 186, 188, 189, 190, 191, 192]
 
@@ -159,7 +159,7 @@ function init() {
     342, 343, 344, 345, 346, 348, 349, 350, 351, 353, 354, 355, 356, 357
   ]
 
- 
+
 
   const lvPar1 = [1, 15, 15, 'Cat', 16, [22, 106, 111, 113, 118, 202], [126, 128, 98], solidLvl1, 300]
   const lvPar2 = [2, 20, 20, 'Cat', 21, [23, 81], [138, 372, 225], solidLvl2, 300]
@@ -230,7 +230,7 @@ function init() {
       // player kills ghosts when mode is on
       // They come back to their original positions and then leave after some time
     }
-    if (!(level.nodes[level.player.index].cell.classList.contains('food')) || !(level.nodes[level.player.index].cell.classList.contains('food')) ) {
+    if (!(level.nodes[level.player.index].cell.classList.contains('food')) || !(level.nodes[level.player.index].cell.classList.contains('food'))) {
       playAudio('audio-step')
     }
     level.nodes[level.player.index].cell.classList.remove('food')
@@ -557,7 +557,7 @@ function init() {
         }
       }, 500)
     }
-    const countDown = setTimeout(function() {
+    const countDown = setTimeout(function () {
       playAudio('audio-countdown')
       clearTimeout(countDown)
     }, 13000)
@@ -615,7 +615,7 @@ function init() {
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
     grid.appendChild(popUpScreen)
-    continueButton.addEventListener('click', function () { 
+    continueButton.addEventListener('click', function () {
       restartLevel()
     }, { once: true })
   }
@@ -760,7 +760,7 @@ function init() {
     }
     score.innerText = `${level.score}`
     if (Number(foodCount.innerText) === 0) {
-      currentLevel ++
+      currentLevel++
       nextLevel(level)
     }
   }
@@ -773,7 +773,7 @@ function init() {
         //gameOver = true
         playerLost(level)
       }
-      if  (levelCompleted === true || gameOver === true) {
+      if (levelCompleted === true || gameOver === true) {
         clearInterval(countSeconds)
         clearTimeout(timeForGame)
       }
@@ -800,7 +800,7 @@ function init() {
     moveRandomly(level, 2)
   }
 
-  
+
   function nextLevel(level) {
     playAudio('audio-win')
     levelCompleted = true
@@ -808,13 +808,13 @@ function init() {
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
     continueButton.innerText = 'Next level 0 0 0'
-    continueButton.addEventListener('click', function () { 
+    continueButton.addEventListener('click', function () {
       restartLevel()
     }, { once: true })
     grid.appendChild(popUpScreen)
     popUpScreen.appendChild(continueButton)
   }
-  
+
   function game(level) {
     levelCompleted = false
     gameOver = false
@@ -822,7 +822,7 @@ function init() {
     setTimers(level)
   }
 
-  function restartLevel() {  
+  function restartLevel() {
     if (document.body.lastChild === continueButton) {
       content.style.display = 'flex'
       document.body.removeChild(continueButton)
@@ -854,10 +854,10 @@ function init() {
     content.style.display = 'none'
     continueButton.classList.add('button-continue')
     continueButton.innerText = 'Press to continue..'
-    restartButton.addEventListener('mouseenter', function() {
+    restartButton.addEventListener('mouseenter', function () {
       playAudio('audio-click')
     }, { once: true })
-    continueButton.addEventListener('click', function() {
+    continueButton.addEventListener('click', function () {
       restartLevel()
     }, { once: true })
     document.body.append(continueButton)
@@ -865,7 +865,14 @@ function init() {
 
   function playAudio(id) {
     const audio = document.getElementById(id)
-    audio.play()
+    const promise = audio.play()
+    if (promise !== undefined) {
+      promise.then( value => {
+        value
+      }).catch(() => {
+        return
+      })
+    }
   }
 
   // ! INVOKING FUNCTIONS
