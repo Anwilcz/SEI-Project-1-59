@@ -82,25 +82,8 @@ function init() {
     152, 154, 155, 156, 157, 158, 159, 160, 162,
     182, 183, 184, 185, 186, 188, 189, 190, 191, 192]
 
-  const solidLvl2 = [
-    44, 45, 46, 48, 49, 50, 52, 54, 55, 56, 58, 59, 60,
-    67, 73, 79,
-    85, 86, 88, 90, 92, 93, 94, 95, 96, 98, 100, 102, 103,
-    111, 119,
-    128, 129, 130, 131, 132, 133, 135, 136, 137, 139, 140, 141, 142, 143, 144,
-    169, 170, 172, 174, 175, 176, 177, 178, 179, 180, 181, 182, 184, 186, 187,
-    193, 195, 203, 205,
-    212, 213, 214, 218, 219, 220, 221, 222, 226, 227, 228,
-    235, 237, 245, 247,
-    253, 254, 256, 258, 259, 260, 261, 262, 263, 264, 265, 266, 268, 270, 271,
-    296, 297, 298, 299, 300, 301, 303, 304, 305, 307, 308, 309, 310, 311, 312,
-    321, 329,
-    337, 338, 340, 342, 344, 345, 346, 347, 348, 350, 352, 354, 355,
-    361, 367, 373, 
-    380, 381, 382, 384, 385, 386, 388, 390, 391, 392, 394, 395, 396
-  ]
 
-  const solidLvl3 = [
+  const solidLvl2 = [
     24, 25, 31, 32,
     40, 41, 43, 44, 46, 47, 48, 50, 51, 53, 54,
     60, 72,
@@ -121,6 +104,23 @@ function init() {
     349, 353
   ]
 
+  const solidLvl3 = [
+    44, 45, 46, 48, 49, 50, 52, 54, 55, 56, 58, 59, 60,
+    67, 73, 79,
+    85, 86, 88, 90, 92, 93, 94, 95, 96, 98, 100, 102, 103,
+    111, 119,
+    128, 129, 130, 131, 132, 133, 135, 136, 137, 139, 140, 141, 142, 143, 144,
+    169, 170, 172, 174, 175, 176, 177, 178, 179, 180, 181, 182, 184, 186, 187,
+    193, 195, 203, 205,
+    212, 213, 214, 218, 219, 220, 221, 222, 226, 227, 228,
+    235, 237, 245, 247,
+    253, 254, 256, 258, 259, 260, 261, 262, 263, 264, 265, 266, 268, 270, 271,
+    296, 297, 298, 299, 300, 301, 303, 304, 305, 307, 308, 309, 310, 311, 312,
+    321, 329,
+    337, 338, 340, 342, 344, 345, 346, 347, 348, 350, 352, 354, 355,
+    361, 367, 373,
+    380, 381, 382, 384, 385, 386, 388, 390, 391, 392, 394, 395, 396
+  ]
 
 
 
@@ -139,7 +139,7 @@ function init() {
       newNode.x = i % level.width
       newNode.y = Math.floor(i / level.width)
       newNode.index = i
-      newNode.cell.innerText = `${newNode.index},` //`[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
+      // newNode.cell.innerText = `${newNode.index},` //`[${newNode.x}, ${newNode.y}] i:${newNode.index}]`
       level.nodes.push(newNode)
     }
     // Adding magic food
@@ -468,19 +468,14 @@ function init() {
   }
 
   // ! SHOCK MODE FUNCTIONS
-  let shockMode = false
-  function switchMode(level) {
-    playAudio('audio-mode')
-    shockMode = true
-    // breaks normal move movements
-    runAway(level)
-  }
 
   let shockModeInterval1
   let shockModeInterval2
   let shockModeInterval3
-
-  function runAway(level) {
+  let shockMode = false
+  function switchMode(level) {
+    playAudio('audio-mode')
+    shockMode = true
     clearInterval(randomMoveInterval)
     clearInterval(targetPlayerInterval)
     clearInterval(targetFourInterval)
@@ -490,47 +485,50 @@ function init() {
   }
 
 
+
+
+
   function targetCorner(level, index, interval) {
     let cornerIndex
-    let timeout
-    // ghostFoundPlayer(level) //! Player found ghost?
-    if (!gameOver && !levelCompleted) { // Need something to switch this
-      const opponentCurrentNode = level.opponents[index]
-      if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
-        cornerIndex = level.nodes.length - (level.width + 2)
-      } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y > ((level.height / 2) - 1))) {//ok
-        cornerIndex = level.nodes.length - ((2 * level.width) - 1)
-      } else if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y < (level.height / 2))) {
-        cornerIndex = ((2 * level.width) - 2)
-      } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y < (level.height / 2))) {
-        cornerIndex = (level.width + 1)
+    const opponentCurrentNode = level.opponents[index]
+    if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y > ((level.height / 2) - 1))) { //ok
+      cornerIndex = level.nodes.length - (level.width + 2)
+    } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y > ((level.height / 2) - 1))) {//ok
+      cornerIndex = level.nodes.length - ((2 * level.width) - 1)
+    } else if ((level.opponents[index].x > ((level.width / 2) - 1)) && (level.opponents[index].y < (level.height / 2))) {
+      cornerIndex = ((2 * level.width) - 2)
+    } else if ((level.opponents[index].x < (level.width / 2)) && (level.opponents[index].y < (level.height / 2))) {
+      cornerIndex = (level.width + 1)
 
-      }
-      level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(230, 145, 0, 0.6)'
-      timeout = setTimeout(function () {
-        level.nodes[cornerIndex].cell.style.boxShadow = 'none'
-        clearTimeout(timeout)
-      }, 15000)
-      interval = setInterval(function () {
-        if (level.opponents[index].index === cornerIndex) {
-          return
-        } else {
-          const path = findPath(level, opponentCurrentNode, level.nodes[cornerIndex])
-          const opponentTargetNode = path[0]
-          removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode, index)
-          changeOpponentPosition(level, opponentTargetNode, index)
-        }
-      }, 500)
     }
+    level.nodes[cornerIndex].cell.style.boxShadow = 'inset 0px 0px 4px 2px rgba(230, 145, 0, 0.6)'
+    interval = setInterval(function () {
+      if (level.opponents[index].index !== cornerIndex && !gameOver && !levelCompleted) {
+        const path = findPath(level, opponentCurrentNode, level.nodes[cornerIndex])
+        const opponentTargetNode = path[0]
+        removeOpponentPosition(level, opponentTargetNode, opponentCurrentNode, index)
+        changeOpponentPosition(level, opponentTargetNode, index)
+      }
+      if (gameOver === true || levelCompleted === true) {
+        shockMode = false
+        clearInterval(interval)
+        clearTimeout(countDown)
+        clearTimeout(shockModeTimeout)
+      }
+    }, 500)
     const countDown = setTimeout(function () {
       playAudio('audio-countdown')
       clearTimeout(countDown)
     }, 13000)
     const shockModeTimeout = setTimeout(function () {
       clearInterval(interval)
-      shockMode = false
-      normalMode(level)
+      clearTimeout(countDown)
       clearTimeout(shockModeTimeout)
+      level.nodes[cornerIndex].cell.style.boxShadow = 'none'
+      if (levelCompleted !== true && gameOver !== true) {
+        shockMode = false
+        normalMode(level)
+      }
       alarm = false
     }, 15000)
   }
@@ -771,12 +769,20 @@ function init() {
     popUpScreen.innerHTML = `<h2>Congratulations!</br>Level <span class='numbers'>${level.number}</span>completed!</h2>`
     popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
     popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
-    continueButton.innerText = 'Next level 0 0 0'
-    continueButton.addEventListener('click', function () {
-      restartLevel()
-    }, { once: true })
     grid.appendChild(popUpScreen)
-    popUpScreen.appendChild(continueButton)
+    if (currentLevel === 4) {
+      continueButton.innerText = 'Continue 0 0 0'
+      popUpScreen.appendChild(continueButton)
+      continueButton.addEventListener('click', function () {
+        endGameScreen(level)
+      }, { once: true })
+    } else {
+      continueButton.innerText = 'Next level 0 0 0'
+      continueButton.addEventListener('click', function () {
+        restartLevel()
+      }, { once: true })
+      popUpScreen.appendChild(continueButton)
+    }
   }
 
   function game(level) {
@@ -786,13 +792,31 @@ function init() {
     setTimers(level)
   }
 
+  function endGameScreen(level) {
+    playAudio('audio-win')
+    levelCompleted = true
+    currentLevel = 1
+    popUpScreen.innerHTML = '<h2>Cat wins!</br></br> You completed all the </br></br> available levels!</h2>'
+    popUpScreen.style.width = main.style.width // Creting a popup screen that covers main grid
+    popUpScreen.style.height = `${(level.height * 28) + 2 * level.height}px`
+    grid.appendChild(popUpScreen)
+    continueButton.innerText = 'Play again  1 0 0 0'
+    continueButton.addEventListener('click', function () {
+      restartLevel()
+    }, { once: true })
+
+    popUpScreen.appendChild(continueButton)
+  }
+
   function restartLevel() {
+    alarm = false
+    gameOver = true
+    while (grid.firstChild) {
+      grid.removeChild(grid.firstChild)
+    }
     if (document.body.lastChild === continueButton) {
       content.style.display = 'flex'
       document.body.removeChild(continueButton)
-    }
-    while (grid.firstChild) {
-      grid.removeChild(grid.firstChild)
     }
     let p
     if (currentLevel === 1) {
@@ -804,10 +828,7 @@ function init() {
     if (currentLevel === 3) {
       p = lvPar3
     }
-    if (currentLevel === 4) {
-      endGameScreen()
-      return
-    }
+
     const newLevel = new Level(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
     newLevel.score = 0
     score.innerText = `${newLevel.score}`
@@ -823,9 +844,6 @@ function init() {
     content.style.display = 'none'
     continueButton.classList.add('button-continue')
     continueButton.innerText = 'Press to continue..'
-    restartButton.addEventListener('mouseenter', function () {
-      playAudio('audio-click')
-    }, { once: true })
     continueButton.addEventListener('click', function () {
       restartLevel()
     }, { once: true })
