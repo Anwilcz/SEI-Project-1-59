@@ -15,7 +15,7 @@ The game is my interpretation of a classic arcade from the 80's - Pacman, where 
 </br>
 </br>
 </br>
-[View deployment in Github pages](https://anwilcz.github.io/SEI-Project-1-59/)
+[View deployment](https://anwilcz.github.io/SEI-Project-1-59/)
 </br>
 </br>
 
