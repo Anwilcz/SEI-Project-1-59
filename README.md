@@ -1,6 +1,6 @@
 # Project 1 - Pacman Game 
 
-Group size: ***[Anna Wilczynska](https://anwilcz.github.io)*** 
+Group size: ***[Anna Wilczynska](https:///github.com/anwilcz)*** 
 </br>
 Duration: ***1 week***
 </br>
