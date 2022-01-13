@@ -276,15 +276,15 @@ To run the game, navigate to the project root directory and open the `index.html
 ## Wins and challenges
 
 ### Wins
-- Satisfying design and game functionality achieved in a relatively short time
-- Implementation of the A Star - pathfinding algorithm
-- Functional user interface that allows the player to restart the game and track current score
-- Transitions between multiple levels 
+- Satisfying design and game functionality achieved in a relatively short time.
+- Implementation of the A Star - pathfinding algorithm.
+- Functional user interface that allows the player to restart the game and track current score.
+- Transitions between multiple levels. 
 - Introducing fully working shock mode to reverse hunting mechanics.
 
 ### Challenges
-- Differentiating opponents movements based on player tracking and randomisation
-- Reversing game mechanics and implementing ‘shock mode’ 
+- Differentiating opponents movements based on player tracking and randomisation.
+- Reversing game mechanics and implementing ‘shock mode’. 
 - Working with time intervals and timeout methods to smooth and synchronise player and opponent movements and terminate shock mode.
 
 ## Key learning
@@ -296,7 +296,7 @@ To run the game, navigate to the project root directory and open the `index.html
 ## Future upgrades
 - Finding an algorithm for maze generation to automate level creation.
 - Differentiate levels difficulty adding more opponents and game mechanics.
-- Preserving player score to be displayed at the end of the game
+- Preserving player score to be displayed at the end of the game.
 - Responsive design: Grid cells should scale uniformly depending on the window inner width to prevent content scrolling on small screens.
 
 ## Copyright and licensing
